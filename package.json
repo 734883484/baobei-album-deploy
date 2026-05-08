@@ -1,0 +1,8 @@
+{
+  "name": "baobei-album-deploy",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}

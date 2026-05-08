@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝贝相册 - 相册编辑</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FDF6E8 0%, #FAF0E0 50%, #F5E8D5 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            padding: 40px 20px;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        
+        .scene {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .shadow-layer {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            height: 30px;
+            background: radial-gradient(ellipse at center, rgba(139, 90, 43, 0.25) 0%, transparent 70%);
+            filter: blur(8px);
+            z-index: 0;
+        }
+        
+        .paper-back {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%) rotate(1.5deg);
+            width: 750px;
+            height: 850px;
+            background: linear-gradient(135deg, #F5E6D3 0%, #EDE0D0 100%);
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(139, 90, 43, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            z-index: 1;
+        }
+        
+        .album {
+            position: relative;
+            width: 750px;
+            min-height: 820px;
+            background: linear-gradient(145deg, #FEFCF5 0%, #FBF5E8 30%, #F7EED8 100%);
+            border-radius: 10px 10px 10px 8px;
+            box-shadow: 
+                0 25px 60px rgba(139, 90, 43, 0.2), 
+                0 10px 25px rgba(139, 90, 43, 0.12),
+                inset 0 2px 0 rgba(255, 255, 255, 0.8), 
+                inset 0 -1px 0 rgba(139, 90, 43, 0.1);
+            z-index: 2;
+            overflow: visible;
+        }
+        
+        .album::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.8' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.4 0 0 0 0 0.25 0 0 0 0.015 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+            border-radius: 10px;
+        }
+        
+        .album::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: 2;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .spine {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 28px;
+            background: linear-gradient(90deg, #4A2C17 0%, #5D3A1E 20%, #6B4423 40%, #5D3A1E 60%, #4A2C17 100%);
+            border-radius: 10px 0 0 10px;
+            z-index: 10;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15), inset -1px 0 3px rgba(255, 255, 255, 0.1);
+        }
+        
+        .spine::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 25px;
+            bottom: 25px;
+            width: 2px;
+            background: repeating-linear-gradient(180deg, transparent, transparent 10px, #8B6914 10px, #8B6914 12px);
+            opacity: 0.6;
+        }
+        
+        .spine::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), transparent);
+        }
+        
+        .rings {
+            position: absolute;
+            left: 28px;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 40px 0;
+            z-index: 5;
+        }
+        
+        .ring-hole {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #E8D5B8 0%, #D4C4A8 100%);
+            box-shadow: inset 2px 2px 4px rgba(139, 90, 43, 0.2), inset -1px -1px 2px rgba(255, 255, 255, 0.5);
+        }
+        
+        .buckle {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 45px;
+            height: 60px;
+            background: linear-gradient(180deg, #5D3A1E 0%, #4A2C17 100%);
+            border-radius: 4px;
+            z-index: 10;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.25), inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+        }
+        
+        .buckle::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 12px;
+            bottom: 12px;
+            width: 1px;
+            background: repeating-linear-gradient(180deg, transparent, transparent 6px, #8B6914 6px, #8B6914 8px);
+            opacity: 0.5;
+        }
+        
+        .buckle-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle at 30% 30%, #FFE082 0%, #FFB300 50%, #E65100 100%);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+        }
+        
+        .content {
+            position: relative;
+            margin-left: 55px;
+            padding: 30px 30px 25px 20px;
+            z-index: 3;
+        }
+        
+        /* 顶部操作栏 */
+        .top-bar {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+        
+        .top-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid #D4C4A8;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #5D3A1E;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .top-btn:hover {
+            background: #FFF;
+            border-color: #B8A070;
+        }
+        
+        .top-btn.done-btn {
+            background: linear-gradient(135deg, #8B6914 0%, #A67C00 100%);
+            color: #FFF;
+            border: none;
+        }
+        
+        .top-btn.done-btn:hover {
+            background: linear-gradient(135deg, #9B7924 0%, #B68C10 100%);
+        }
+        
+        .top-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* 标题区 */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .album-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #5D3A1E;
+            letter-spacing: 2px;
+        }
+        
+        .album-date {
+            font-size: 12px;
+            color: #8B7355;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+        
+        /* 编辑相册信息 */
+        .album-edit-section {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px dashed #D4C4A8;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 13px;
+            color: #8B6914;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .section-title::before {
+            content: '✏️';
+        }
+        
+        .edit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .edit-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .edit-field {
+            flex: 1;
+        }
+        
+        .edit-label {
+            font-size: 12px;
+            color: #8B7355;
+            margin-bottom: 4px;
+        }
+        
+        .edit-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #E8D5B8;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #FFF;
+            color: #5D3A1E;
+        }
+        
+        .edit-input:focus {
+            outline: none;
+            border-color: #B8A070;
+        }
+        
+        /* 照片网格 */
+        .photos-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            padding: 10px 0;
+        }
+        
+        /* 照片卡片 - 编辑态 */
+        .photo-card {
+            background: #FEFEFE;
+            padding: 15px 15px 55px 15px;
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.08),
+                0 4px 16px rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+        
+        .photo-card:nth-child(odd) {
+            transform: rotate(-2deg);
+        }
+        
+        .photo-card:nth-child(even) {
+            transform: rotate(1.5deg);
+        }
+        
+        .photo-card:nth-child(3n) {
+            transform: rotate(1deg);
+        }
+        
+        /* 编辑态操作按钮 */
+        .photo-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+        
+        .photo-action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .edit-action {
+            background: rgba(255, 255, 255, 0.9);
+            color: #6B4423;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .edit-action:hover {
+            background: #FFF;
+            transform: scale(1.1);
+        }
+        
+        .delete-action {
+            background: rgba(220, 53, 69, 0.9);
+            color: #FFF;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .delete-action:hover {
+            background: #dc3545;
+            transform: scale(1.1);
+        }
+        
+        /* 照片尺寸 */
+        .photo-card.size-3-4 {
+            width: 210px;
+        }
+        .photo-card.size-3-4 .photo-image {
+            width: 100%;
+            height: 280px;
+        }
+        
+        .photo-card.size-4-3 {
+            width: 280px;
+        }
+        .photo-card.size-4-3 .photo-image {
+            width: 100%;
+            height: 210px;
+        }
+        
+        .photo-image {
+            background: #F5F5F5;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .photo-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .photo-note {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            right: 15px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .photo-note-text {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 13px;
+            color: #555;
+            text-align: center;
+            line-height: 1.4;
+            font-style: italic;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .photo-date {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-family: 'Courier New', monospace;
+            font-size: 8px;
+            color: rgba(255, 100, 80, 0.7);
+            letter-spacing: 0.5px;
+        }
+        
+        /* 添加照片按钮 */
+        .add-photo-card {
+            width: 210px;
+            height: 350px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px dashed #D4C4A8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: rotate(-0.5deg);
+        }
+        
+        .add-photo-card:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #B8A070;
+            transform: rotate(0deg);
+        }
+        
+        .add-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #F5E6D3 0%, #E8D5B8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #8B7355;
+            margin-bottom: 10px;
+        }
+        
+        .add-text {
+            font-size: 13px;
+            color: #A08060;
+        }
+        
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: linear-gradient(145deg, #FEFCF5 0%, #FBF5E8 100%);
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+            width: 90%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #6B4423 0%, #5D3A1E 100%);
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #FEFCF5;
+            letter-spacing: 1px;
+        }
+        
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #FEFCF5;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #D4C4A8;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #B8A070;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .upload-area.has-image {
+            padding: 10px;
+        }
+        
+        .upload-area img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 4px;
+        }
+        
+        .upload-icon {
+            font-size: 36px;
+            color: #C0A878;
+            margin-bottom: 10px;
+        }
+        
+        .upload-text {
+            font-size: 14px;
+            color: #8B7355;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #5D3A1E;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #E8D5B8;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #FEFEFE;
+            color: #4A3728;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #B8A070;
+        }
+        
+        .form-input::placeholder {
+            color: #C0A878;
+        }
+        
+        .size-selector-large {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .size-option-large {
+            flex: 1;
+            cursor: pointer;
+        }
+        
+        .size-option-large input[type="radio"] {
+            display: none;
+        }
+        
+        .size-card {
+            background: #FFF;
+            border: 2px solid #E8D5B8;
+            border-radius: 12px;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .size-option-large input[type="radio"]:checked + .size-card {
+            border-color: #8B6914;
+            background: #FFFDF5;
+            box-shadow: 0 4px 16px rgba(139, 105, 20, 0.15);
+        }
+        
+        .size-option-large:hover .size-card {
+            border-color: #C0A878;
+        }
+        
+        .size-preview-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80px;
+        }
+        
+        .size-preview-frame {
+            background: linear-gradient(145deg, #F5E6D3 0%, #EDE0D0 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(139, 90, 43, 0.1);
+        }
+        
+        .size-frame-3-4 {
+            width: 48px;
+            height: 64px;
+        }
+        
+        .size-frame-4-3 {
+            width: 64px;
+            height: 48px;
+        }
+        
+        .frame-icon {
+            font-size: 20px;
+        }
+        
+        .size-info {
+            text-align: center;
+        }
+        
+        .size-title {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: #5D3A1E;
+            margin-bottom: 4px;
+        }
+        
+        .size-desc {
+            display: block;
+            font-size: 12px;
+            color: #8B7355;
+        }
+        
+        .size-check {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8B6914 0%, #A67C00 100%);
+            color: #FFF;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .size-option-large input[type="radio"]:checked + .size-card .size-check {
+            display: flex;
+        }
+        
+        .upload-hint {
+            font-size: 12px;
+            color: #8B6914;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: rgba(139, 105, 20, 0.08);
+            border-radius: 4px;
+        }
+        
+        .steps-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 25px 0;
+            gap: 10px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        
+        .step.active {
+            opacity: 1;
+        }
+        
+        .step.completed {
+            opacity: 1;
+        }
+        
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #E8D5B8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #8B7355;
+            transition: all 0.3s;
+        }
+        
+        .step.active .step-number {
+            background: linear-gradient(135deg, #8B6914 0%, #A67C00 100%);
+            color: #FFF;
+        }
+        
+        .step.completed .step-number {
+            background: #8B6914;
+            color: #FFF;
+        }
+        
+        .step-text {
+            font-size: 13px;
+            color: #8B7355;
+        }
+        
+        .step.active .step-text {
+            color: #5D3A1E;
+            font-weight: 500;
+        }
+        
+        .step-line {
+            width: 40px;
+            height: 2px;
+            background: #E8D5B8;
+            margin: 0 5px;
+        }
+        
+        .step-content {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-footer {
+            padding: 0 25px 25px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .btn-cancel {
+            background: #F5E8D5;
+            color: #8B7355;
+        }
+        
+        .btn-cancel:hover {
+            background: #EDE0D0;
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #8B6914 0%, #A67C00 100%);
+            color: #FFF;
+        }
+        
+        .btn-save:hover {
+            background: linear-gradient(135deg, #9B7924 0%, #B68C10 100%);
+        }
+        
+        .btn-secondary {
+            background: #E8D5B8;
+            color: #6B4423;
+        }
+        
+        .btn-secondary:hover {
+            background: #D4C4A8;
+        }
+        
+        .hidden-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="shadow-layer"></div>
+        <div class="paper-back"></div>
+        
+        <div class="album">
+            <div class="spine"></div>
+            <div class="rings">
+                <div class="ring-hole"></div>
+                <div class="ring-hole"></div>
+                <div class="ring-hole"></div>
+                <div class="ring-hole"></div>
+                <div class="ring-hole"></div>
+            </div>
+            <div class="buckle">
+                <div class="buckle-btn"></div>
+            </div>
+            
+            <!-- 顶部操作栏 -->
+            <div class="top-bar">
+                <button class="top-btn" onclick="goBack()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    返回
+                </button>
+                <button class="top-btn done-btn" onclick="saveAll()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    完成
+                </button>
+            </div>
+            
+            <div class="content">
+                <div class="header">
+                    <div class="album-title">宝宝的一岁</div>
+                    <div class="album-date">2024.03.15</div>
+                </div>
+                
+
+                
+                <div class="photos-grid">
+                    <!-- 照片卡片1 - 竖版 3:4 -->
+                    <div class="photo-card size-3-4">
+                        <div class="photo-actions">
+                            <button class="photo-action-btn edit-action" onclick="editPhoto(1)" title="编辑">✏️</button>
+                            <button class="photo-action-btn delete-action" onclick="deletePhoto(1)" title="删除">×</button>
+                        </div>
+                        <div class="photo-image">
+                            <img src="https://picsum.photos/seed/baby1/280/380" alt="照片">
+                            <div class="photo-date">24 03 15</div>
+                        </div>
+                        <div class="photo-note">
+                            <span class="photo-note-text">第一次吃蛋糕，满脸都是奶油</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 照片卡片2 - 横版 4:3 -->
+                    <div class="photo-card size-4-3">
+                        <div class="photo-actions">
+                            <button class="photo-action-btn edit-action" onclick="editPhoto(2)" title="编辑">✏️</button>
+                            <button class="photo-action-btn delete-action" onclick="deletePhoto(2)" title="删除">×</button>
+                        </div>
+                        <div class="photo-image">
+                            <img src="https://picsum.photos/seed/baby2/380/280" alt="照片">
+                            <div class="photo-date">24 03 15</div>
+                        </div>
+                        <div class="photo-note">
+                            <span class="photo-note-text">爷爷抱着笑得超开心</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 照片卡片3 - 横版 4:3 -->
+                    <div class="photo-card size-4-3">
+                        <div class="photo-actions">
+                            <button class="photo-action-btn edit-action" onclick="editPhoto(3)" title="编辑">✏️</button>
+                            <button class="photo-action-btn delete-action" onclick="deletePhoto(3)" title="删除">×</button>
+                        </div>
+                        <div class="photo-image">
+                            <img src="https://picsum.photos/seed/baby3/380/280" alt="照片">
+                            <div class="photo-date">24 03 15</div>
+                        </div>
+                        <div class="photo-note">
+                            <span class="photo-note-text">收到了好多礼物！</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 照片卡片4 - 竖版 3:4 -->
+                    <div class="photo-card size-3-4">
+                        <div class="photo-actions">
+                            <button class="photo-action-btn edit-action" onclick="editPhoto(4)" title="编辑">✏️</button>
+                            <button class="photo-action-btn delete-action" onclick="deletePhoto(4)" title="删除">×</button>
+                        </div>
+                        <div class="photo-image">
+                            <img src="https://picsum.photos/seed/baby4/280/380" alt="照片">
+                            <div class="photo-date">24 03 15</div>
+                        </div>
+                        <div class="photo-note">
+                            <span class="photo-note-text">全家福，幸福满满</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 添加照片按钮 -->
+                    <div class="add-photo-card" onclick="openAddModal()">
+                        <div class="add-icon">+</div>
+                        <span class="add-text">添加照片</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加/编辑照片弹窗 -->
+    <div class="modal-overlay" id="photoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">添加照片</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            
+            <!-- 步骤指示器 -->
+            <div class="steps-indicator" id="stepsIndicator">
+                <div class="step active" id="step1Indicator">
+                    <span class="step-number">1</span>
+                    <span class="step-text">选择尺寸</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" id="step2Indicator">
+                    <span class="step-number">2</span>
+                    <span class="step-text">上传照片</span>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 步骤1：选择尺寸 -->
+                <div class="step-content" id="step1Content">
+                    <div class="form-group">
+                        <label class="form-label">选择照片尺寸</label>
+                        <div class="size-selector-large">
+                            <label class="size-option-large">
+                                <input type="radio" name="photoSize" value="3-4" checked onchange="selectSize('3-4')">
+                                <div class="size-card">
+                                    <div class="size-preview-wrapper">
+                                        <div class="size-preview-frame size-frame-3-4">
+                                            <span class="frame-icon">📐</span>
+                                        </div>
+                                    </div>
+                                    <div class="size-info">
+                                        <span class="size-title">3:4 竖版</span>
+                                        <span class="size-desc">适合人像、全身照</span>
+                                    </div>
+                                    <div class="size-check">✓</div>
+                                </div>
+                            </label>
+                            <label class="size-option-large">
+                                <input type="radio" name="photoSize" value="4-3" onchange="selectSize('4-3')">
+                                <div class="size-card">
+                                    <div class="size-preview-wrapper">
+                                        <div class="size-preview-frame size-frame-4-3">
+                                            <span class="frame-icon">🖼️</span>
+                                        </div>
+                                    </div>
+                                    <div class="size-info">
+                                        <span class="size-title">4:3 横版</span>
+                                        <span class="size-desc">适合风景、合影</span>
+                                    </div>
+                                    <div class="size-check">✓</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 步骤2：上传照片 -->
+                <div class="step-content" id="step2Content" style="display: none;">
+                    <div class="upload-area" id="uploadArea" onclick="triggerUpload()">
+                        <div id="uploadContent">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">点击上传照片</div>
+                            <div class="upload-hint" id="selectedSizeHint">已选：3:4 竖版</div>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" class="hidden-input" accept="image/*" onchange="handleFileSelect(event)">
+                    
+                    <div class="form-group">
+                        <label class="form-label">备注</label>
+                        <input type="text" class="form-input" id="noteInput" placeholder="写下这张照片的故事...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn btn-secondary" id="backBtn" style="display: none;" onclick="goToStep1()">上一步</button>
+                <button class="btn btn-save" id="nextBtn" onclick="nextStep()">下一步</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentStep = 1;
+        let selectedSize = '3-4';
+        let editingPhotoId = null;
+        
+        function goBack() {
+            window.location.href = '相册页.html';
+        }
+        
+        function saveAll() {
+            alert('保存成功！');
+            window.location.href = '相册页.html';
+        }
+        
+        function editPhoto(id) {
+            editingPhotoId = id;
+            document.getElementById('modalTitle').textContent = '编辑照片';
+            document.getElementById('stepsIndicator').style.display = 'none';
+            document.getElementById('step1Content').style.display = 'none';
+            document.getElementById('step2Content').style.display = 'block';
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('nextBtn').textContent = '保存';
+            document.getElementById('nextBtn').onclick = savePhoto;
+            document.getElementById('noteInput').value = '第' + id + '张照片的备注';
+            document.getElementById('uploadArea').classList.add('has-image');
+            document.getElementById('uploadContent').innerHTML = '<img src="https://picsum.photos/seed/baby' + id + '/280/380" alt="预览">';
+            document.getElementById('photoModal').classList.add('active');
+        }
+        
+        function deletePhoto(id) {
+            if (confirm('确定要删除这张照片吗？')) {
+                alert('照片 ' + id + ' 已删除');
+            }
+        }
+        
+        function openAddModal() {
+            editingPhotoId = null;
+            document.getElementById('modalTitle').textContent = '添加照片';
+            document.getElementById('stepsIndicator').style.display = 'flex';
+            resetModal();
+            document.getElementById('photoModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('photoModal').classList.remove('active');
+            resetModal();
+        }
+        
+        function resetModal() {
+            currentStep = 1;
+            selectedSize = '3-4';
+            updateStepUI();
+            document.querySelector('input[name="photoSize"][value="3-4"]').checked = true;
+            document.getElementById('uploadArea').classList.remove('has-image');
+            document.getElementById('uploadContent').innerHTML = `
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">点击上传照片</div>
+                <div class="upload-hint" id="selectedSizeHint">已选：3:4 竖版</div>
+            `;
+            document.getElementById('noteInput').value = '';
+        }
+        
+        function selectSize(size) {
+            selectedSize = size;
+        }
+        
+        function updateStepUI() {
+            const step1Indicator = document.getElementById('step1Indicator');
+            const step2Indicator = document.getElementById('step2Indicator');
+            const step1Content = document.getElementById('step1Content');
+            const step2Content = document.getElementById('step2Content');
+            const nextBtn = document.getElementById('nextBtn');
+            const backBtn = document.getElementById('backBtn');
+            
+            if (currentStep === 1) {
+                step1Indicator.classList.add('active');
+                step1Indicator.classList.remove('completed');
+                step2Indicator.classList.remove('active');
+                step1Content.style.display = 'block';
+                step2Content.style.display = 'none';
+                nextBtn.textContent = '下一步';
+                nextBtn.onclick = nextStep;
+                backBtn.style.display = 'none';
+            } else if (currentStep === 2) {
+                step1Indicator.classList.remove('active');
+                step1Indicator.classList.add('completed');
+                step2Indicator.classList.add('active');
+                step1Content.style.display = 'none';
+                step2Content.style.display = 'block';
+                nextBtn.textContent = editingPhotoId ? '保存' : '保存';
+                nextBtn.onclick = savePhoto;
+                backBtn.style.display = 'inline-block';
+                
+                const sizeText = selectedSize === '3-4' ? '3:4 竖版' : '4:3 横版';
+                const hintElement = document.getElementById('selectedSizeHint');
+                if (hintElement) {
+                    hintElement.textContent = '已选：' + sizeText;
+                }
+            }
+        }
+        
+        function nextStep() {
+            if (currentStep === 1) {
+                currentStep = 2;
+                updateStepUI();
+            }
+        }
+        
+        function goToStep1() {
+            currentStep = 1;
+            updateStepUI();
+        }
+        
+        function triggerUpload() {
+            document.getElementById('fileInput').click();
+        }
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('uploadArea').classList.add('has-image');
+                    document.getElementById('uploadContent').innerHTML = '<img src="' + e.target.result + '" alt="预览">';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function savePhoto() {
+            if (editingPhotoId) {
+                alert('照片 ' + editingPhotoId + ' 已更新');
+            } else {
+                alert('照片添加成功');
+            }
+            closeModal();
+        }
+    </script>
+    <script src="./app-config.js"></script>
+    <script type="module" src="./js/album-edit.js"></script>
+</body>
+</html>
