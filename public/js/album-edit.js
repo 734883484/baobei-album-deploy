@@ -103,19 +103,22 @@ function handleFileSelect(event) {
 }
 
 function renderCard(item) {
+  const sizeClass = item.ratio === "4:3" ? "size-4-3" : "size-3-4";
   const mediaTag =
     item.media_type === "video"
-      ? `<video class="photo-image" src="${item.url}" controls preload="metadata"></video>`
-      : `<img class="photo-image" src="${item.url}" alt="照片">`;
+      ? `<video src="${item.url}" controls preload="metadata"></video>`
+      : `<img src="${item.url}" alt="照片">`;
 
   return `
-    <div class="photo-card ${item.ratio === "4:3" ? "landscape" : ""}" data-id="${item.id}">
+    <div class="photo-card ${sizeClass}" data-id="${item.id}">
       <div class="photo-actions">
         <button class="edit-btn" data-action="edit">编辑</button>
         <button class="delete-btn" data-action="delete">删除</button>
       </div>
-      <div class="photo-inner">${mediaTag}</div>
-      <div class="photo-note">${item.remark || ""}</div>
+      <div class="photo-image">${mediaTag}</div>
+      <div class="photo-note">
+        <span class="photo-note-text">${item.remark || ""}</span>
+      </div>
     </div>
   `;
 }

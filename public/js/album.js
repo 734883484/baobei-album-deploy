@@ -1,17 +1,20 @@
 import { fetchAlbum, fetchAlbumMedia, formatDate, getAlbumIdFromQuery, PAGE_URLS, requireSession } from "./common.js";
 
 function renderMediaCard(item) {
+  const sizeClass = item.ratio === "4:3" ? "size-4-3" : "size-3-4";
   const mediaTag =
     item.media_type === "video"
-      ? `<video class="photo-image" src="${item.url}" controls preload="metadata"></video>`
-      : `<img class="photo-image" src="${item.url}" alt="相册内容">`;
+      ? `<video src="${item.url}" controls preload="metadata"></video>`
+      : `<img src="${item.url}" alt="相册内容">`;
 
   return `
-    <div class="photo-card ${item.ratio === "4:3" ? "landscape" : ""}">
-      <div class="photo-inner">
+    <div class="photo-card ${sizeClass}">
+      <div class="photo-image">
         ${mediaTag}
       </div>
-      <div class="photo-note">${item.remark || ""}</div>
+      <div class="photo-note">
+        <span class="photo-note-text">${item.remark || ""}</span>
+      </div>
     </div>
   `;
 }
