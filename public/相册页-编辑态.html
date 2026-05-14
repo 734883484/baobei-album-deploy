@@ -897,77 +897,15 @@
             
             <div class="content">
                 <div class="header">
-                    <div class="album-title">宝宝的一岁</div>
-                    <div class="album-date">2024.03.15</div>
+                    <div class="album-title">相册加载中...</div>
+                    <div class="album-date"></div>
                 </div>
                 
 
                 
                 <div class="photos-grid">
-                    <!-- 照片卡片1 - 竖版 3:4 -->
-                    <div class="photo-card size-3-4">
-                        <div class="photo-actions">
-                            <button class="photo-action-btn edit-action" onclick="editPhoto(1)" title="编辑">✏️</button>
-                            <button class="photo-action-btn delete-action" onclick="deletePhoto(1)" title="删除">×</button>
-                        </div>
-                        <div class="photo-image">
-                            <img src="https://picsum.photos/seed/baby1/280/380" alt="照片">
-                            <div class="photo-date">24 03 15</div>
-                        </div>
-                        <div class="photo-note">
-                            <span class="photo-note-text">第一次吃蛋糕，满脸都是奶油</span>
-                        </div>
-                    </div>
-                    
-                    <!-- 照片卡片2 - 横版 4:3 -->
-                    <div class="photo-card size-4-3">
-                        <div class="photo-actions">
-                            <button class="photo-action-btn edit-action" onclick="editPhoto(2)" title="编辑">✏️</button>
-                            <button class="photo-action-btn delete-action" onclick="deletePhoto(2)" title="删除">×</button>
-                        </div>
-                        <div class="photo-image">
-                            <img src="https://picsum.photos/seed/baby2/380/280" alt="照片">
-                            <div class="photo-date">24 03 15</div>
-                        </div>
-                        <div class="photo-note">
-                            <span class="photo-note-text">爷爷抱着笑得超开心</span>
-                        </div>
-                    </div>
-                    
-                    <!-- 照片卡片3 - 横版 4:3 -->
-                    <div class="photo-card size-4-3">
-                        <div class="photo-actions">
-                            <button class="photo-action-btn edit-action" onclick="editPhoto(3)" title="编辑">✏️</button>
-                            <button class="photo-action-btn delete-action" onclick="deletePhoto(3)" title="删除">×</button>
-                        </div>
-                        <div class="photo-image">
-                            <img src="https://picsum.photos/seed/baby3/380/280" alt="照片">
-                            <div class="photo-date">24 03 15</div>
-                        </div>
-                        <div class="photo-note">
-                            <span class="photo-note-text">收到了好多礼物！</span>
-                        </div>
-                    </div>
-                    
-                    <!-- 照片卡片4 - 竖版 3:4 -->
-                    <div class="photo-card size-3-4">
-                        <div class="photo-actions">
-                            <button class="photo-action-btn edit-action" onclick="editPhoto(4)" title="编辑">✏️</button>
-                            <button class="photo-action-btn delete-action" onclick="deletePhoto(4)" title="删除">×</button>
-                        </div>
-                        <div class="photo-image">
-                            <img src="https://picsum.photos/seed/baby4/280/380" alt="照片">
-                            <div class="photo-date">24 03 15</div>
-                        </div>
-                        <div class="photo-note">
-                            <span class="photo-note-text">全家福，幸福满满</span>
-                        </div>
-                    </div>
-                    
-                    <!-- 添加照片按钮 -->
-                    <div class="add-photo-card" onclick="openAddModal()">
-                        <div class="add-icon">+</div>
-                        <span class="add-text">添加照片</span>
+                    <div class="photo-card empty-card" style="width:240px;height:320px;display:flex;align-items:center;justify-content:center;color:#8B7355;">
+                        正在读取照片或视频...
                     </div>
                 </div>
             </div>
@@ -1084,9 +1022,13 @@
             document.getElementById('backBtn').style.display = 'none';
             document.getElementById('nextBtn').textContent = '保存';
             document.getElementById('nextBtn').onclick = savePhoto;
-            document.getElementById('noteInput').value = '第' + id + '张照片的备注';
+            document.getElementById('noteInput').value = '';
             document.getElementById('uploadArea').classList.add('has-image');
-            document.getElementById('uploadContent').innerHTML = '<img src="https://picsum.photos/seed/baby' + id + '/280/380" alt="预览">';
+            document.getElementById('uploadContent').innerHTML = `
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">重新选择照片或视频</div>
+                <div class="upload-hint" id="selectedSizeHint">如需重新选择尺寸，请点击上一步</div>
+            `;
             document.getElementById('photoModal').classList.add('active');
         }
         
