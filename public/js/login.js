@@ -1,4 +1,4 @@
-import { isConfigured, loginByNickname, PAGE_URLS, showMessage } from "./common.js";
+import { getCurrentProfileIfAny, isConfigured, loginByNickname, PAGE_URLS, routeAfterAuth, showMessage } from "./common.js";
 
 function togglePwd() {
   const input = document.getElementById("pwd");
@@ -54,7 +54,8 @@ async function init() {
 
     try {
       await loginByNickname(nickname, password, rememberInput.checked);
-      window.location.href = PAGE_URLS.albums;
+      const profile = await getCurrentProfileIfAny();
+      routeAfterAuth(profile);
     } catch (error) {
       showMessage(message, error.message || "登录失败，请重试");
     } finally {

@@ -3,6 +3,7 @@ import {
   fetchAlbums,
   fetchCurrentProfile,
   formatDate,
+  isBabyProfileComplete,
   mediaSummary,
   PAGE_URLS,
   requireSession,
@@ -69,6 +70,10 @@ async function renderAlbums(list, container) {
 async function init() {
   await requireSession();
   const profile = await fetchCurrentProfile();
+  if (!isBabyProfileComplete(profile)) {
+    window.location.href = PAGE_URLS.setup;
+    return;
+  }
   const title = document.querySelector(".main-title");
   if (profile?.baby_nickname) {
     title.textContent = `${profile.baby_nickname}相册`;

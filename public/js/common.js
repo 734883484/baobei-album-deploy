@@ -13,6 +13,7 @@ export const supabase = createClient(config.supabaseUrl ?? "", config.supabaseAn
 export const PAGE_URLS = {
   login: "登录页-最终版.html",
   register: "注册页.html",
+  setup: "输入昵称页.html",
   albums: "目录页.html",
   album: "相册页.html",
   albumEdit: "相册页-编辑态.html"
@@ -67,6 +68,42 @@ export async function fetchCurrentProfile() {
   return data;
 }
 
+export async function getCurrentProfileIfAny() {
+  const session = await getSession();
+  if (!session) return null;
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id,nickname,email,baby_nickname,baby_birth_date")
+    .eq("id", session.user.id)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export function isBabyProfileComplete(profile) {
+  return Boolean(profile?.baby_nickname && profile?.baby_birth_date);
+}
+
+export function routeAfterAuth(profile) {
+  window.location.href = isBabyProfileComplete(profile) ? PAGE_URLS.albums : PAGE_URLS.setup;
+}
+
+export async function updateBabyProfile({ babyNickname, babyBirthDate }) {
+  const session = await requireSession();
+  if (!session) return null;
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({
+      baby_nickname: babyNickname,
+      baby_birth_date: babyBirthDate
+    })
+    .eq("id", session.user.id)
+    .select("id,nickname,email,baby_nickname,baby_birth_date")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function loginByNickname(nickname, password) {
   const { data: nicknameLookup, error: nicknameError } = await supabase.rpc("get_login_email", {
     nickname_input: nickname
@@ -83,7 +120,12 @@ export async function loginByNickname(nickname, password) {
     password
   });
 
-  if (error) throw error;
+  if (error) {
+    if (String(error.message).toLowerCase().includes("email not confirmed")) {
+      throw new Error("该账号邮箱未确认，请在 Supabase Authentication 用户列表里确认该用户，或注册一个新账号再试");
+    }
+    throw error;
+  }
   return data;
 }
 

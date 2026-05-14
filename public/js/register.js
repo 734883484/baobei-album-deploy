@@ -1,4 +1,4 @@
-import { isConfigured, PAGE_URLS, registerAccount, showMessage } from "./common.js";
+import { getCurrentProfileIfAny, isConfigured, PAGE_URLS, registerAccount, routeAfterAuth, showMessage } from "./common.js";
 
 function togglePwd(id) {
   const input = document.getElementById(id);
@@ -58,10 +58,20 @@ async function init() {
     showMessage(message, "");
 
     try {
-      await registerAccount({ nickname, email, password });
-      showMessage(message, "注册成功，正在跳转登录页...", "success");
+      const result = await registerAccount({ nickname, email, password });
+      if (!result.session) {
+        showMessage(message, "注册成功，请先完成邮箱确认后再登录。若你已关闭邮箱确认，请重新注册一个新账号测试。", "success");
+        setTimeout(() => {
+          window.location.href = PAGE_URLS.login;
+        }, 1600);
+        return;
+      }
+
+      showMessage(message, "注册成功，正在进入宝贝信息设置...", "success");
       setTimeout(() => {
-        window.location.href = PAGE_URLS.login;
+        getCurrentProfileIfAny().then(routeAfterAuth).catch(() => {
+          window.location.href = PAGE_URLS.setup;
+        });
       }, 900);
     } catch (error) {
       showMessage(message, error.message || "注册失败，请重试");

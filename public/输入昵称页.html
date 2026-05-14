@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝贝相册 - 宝贝信息</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FDF6E8 0%, #FAF0E0 50%, #F5E8D5 100%);
+            display: flex; justify-content: center; align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            padding: 40px 20px;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        .scene { position: relative; width: 100%; max-width: 500px; }
+        .shadow-layer {
+            position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+            width: 92%; height: 30px;
+            background: radial-gradient(ellipse at center, rgba(139, 90, 43, 0.25) 0%, transparent 70%);
+            filter: blur(8px); z-index: 0;
+        }
+        .paper-back {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%) rotate(1.5deg);
+            width: 420px; height: 520px;
+            background: linear-gradient(135deg, #F5E6D3 0%, #EDE0D0 100%);
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(139, 90, 43, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            z-index: 1;
+        }
+        .album {
+            position: relative; width: 420px;
+            background: linear-gradient(145deg, #FEFCF5 0%, #FBF5E8 30%, #F7EED8 100%);
+            border-radius: 10px 10px 10px 8px;
+            box-shadow: 0 25px 60px rgba(139, 90, 43, 0.2), 0 10px 25px rgba(139, 90, 43, 0.12), inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(139, 90, 43, 0.1);
+            z-index: 2; overflow: hidden;
+        }
+        .album::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.8' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.4 0 0 0 0 0.25 0 0 0 0.015 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 1;
+        }
+        .spine {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 28px;
+            background: linear-gradient(90deg, #4A2C17 0%, #5D3A1E 20%, #6B4423 40%, #5D3A1E 60%, #4A2C17 100%);
+            border-radius: 10px 0 0 10px; z-index: 10;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15), inset -1px 0 3px rgba(255, 255, 255, 0.1);
+        }
+        .spine::before {
+            content: ''; position: absolute; left: 10px; top: 25px; bottom: 25px; width: 2px;
+            background: repeating-linear-gradient(180deg, transparent, transparent 10px, #8B6914 10px, #8B6914 12px);
+            opacity: 0.6;
+        }
+        .rings {
+            position: absolute; left: 28px; top: 0; bottom: 0; width: 20px;
+            display: flex; flex-direction: column; justify-content: space-around; padding: 40px 0; z-index: 5;
+        }
+        .ring-hole {
+            width: 14px; height: 14px; border-radius: 50%;
+            background: linear-gradient(135deg, #E8D5B8 0%, #D4C4A8 100%);
+            box-shadow: inset 2px 2px 4px rgba(139, 90, 43, 0.2), inset -1px -1px 2px rgba(255, 255, 255, 0.5);
+        }
+        .buckle {
+            position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+            width: 45px; height: 60px;
+            background: linear-gradient(180deg, #5D3A1E 0%, #4A2C17 100%);
+            border-radius: 4px; z-index: 10;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.25), inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+        }
+        .buckle-btn {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            width: 15px; height: 15px;
+            background: radial-gradient(circle at 30% 30%, #FFE082 0%, #FFB300 50%, #E65100 100%);
+            border-radius: 50%;
+        }
+        .content {
+            position: relative; margin-left: 55px; padding: 54px 40px 48px 25px; z-index: 3;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .photo-frame { position: relative; width: 125px; height: 95px; margin-bottom: 18px; }
+        .photo-frame::before {
+            content: ''; position: absolute; inset: -7px;
+            background: linear-gradient(135deg, #FBF5E8 0%, #F7EED8 100%);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(139, 90, 43, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        .photo-clip { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 8px; }
+        .baby-photo { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+        .title-area { text-align: center; margin-bottom: 22px; }
+        .main-title { font-size: 23px; font-weight: 700; color: #5D3A1E; letter-spacing: 2px; margin-bottom: 6px; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5); }
+        .subtitle { font-size: 12px; color: #8B6914; line-height: 1.7; }
+        .heart { font-size: 10px; }
+        .form { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+        .input-wrap { position: relative; width: 100%; }
+        .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #A68B5B; z-index: 2; }
+        .input {
+            width: 100%; height: 44px; padding: 0 14px 0 42px;
+            background: linear-gradient(180deg, #FFFEFA 0%, #FFF9F0 100%);
+            border: 1.5px solid #D4C4A8; border-radius: 10px;
+            font-size: 14px; color: #5D3A1E; outline: none;
+            box-shadow: inset 0 2px 4px rgba(139, 90, 43, 0.05), 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        .input::placeholder { color: #B8A07A; }
+        .btn-save {
+            width: 100%; height: 48px;
+            background: linear-gradient(180deg, #6B4423 0%, #5D3A1E 100%);
+            color: #FFF8E7; border: none; border-radius: 10px;
+            font-size: 16px; font-weight: 600; cursor: pointer; letter-spacing: 3px;
+            box-shadow: 0 4px 15px rgba(139, 90, 43, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            margin-top: 4px;
+        }
+        .message { display: none; font-size: 12px; color: #b65b52; }
+        @media (max-width: 500px) {
+            .album { width: 100%; max-width: 380px; }
+            .paper-back { width: 100%; max-width: 370px; height: auto; min-height: 520px; }
+            .content { padding: 40px 25px 35px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="shadow-layer"></div>
+        <div class="paper-back"></div>
+        <div class="album">
+            <div class="spine"></div>
+            <div class="rings"><div class="ring-hole"></div><div class="ring-hole"></div><div class="ring-hole"></div></div>
+            <div class="buckle"><div class="buckle-btn"></div></div>
+            <div class="content">
+                <div class="photo-frame">
+                    <div class="photo-clip">
+                        <img src="./baby_photo.webp" alt="宝宝照片" class="baby-photo">
+                    </div>
+                </div>
+                <div class="title-area">
+                    <h1 class="main-title">欢迎来到宝贝相册</h1>
+                    <p class="subtitle">请先填写宝贝的信息<br>让相册从今天开始记录成长</p>
+                    <span class="heart">💗</span>
+                </div>
+                <form class="form" id="setupForm">
+                    <div class="input-wrap">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                        <input type="text" class="input" id="babyNickname" placeholder="请输入宝贝昵称" required>
+                    </div>
+                    <div class="input-wrap">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        <input type="date" class="input" id="babyBirthDate" required>
+                    </div>
+                    <div class="message" id="setupMessage"></div>
+                    <button type="submit" class="btn-save">开始记录</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="./app-config.js"></script>
+    <script type="module" src="./js/setup.js"></script>
+</body>
+</html>
