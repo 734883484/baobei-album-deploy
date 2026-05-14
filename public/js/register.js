@@ -23,7 +23,7 @@ async function init() {
 
   loginLink.href = PAGE_URLS.login;
   if (photo) {
-    photo.src = "./baby_photo.webp";
+    photo.src = "./xiaojiu.png";
   }
 
   form.addEventListener("submit", async (event) => {
