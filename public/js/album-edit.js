@@ -206,6 +206,9 @@ function previewUpload(file) {
     `;
     const image = document.getElementById("cropImage");
     image.addEventListener("load", setupCropImage, { once: true });
+    if (image.complete) {
+      setupCropImage();
+    }
     bindCropDrag();
   }
 
