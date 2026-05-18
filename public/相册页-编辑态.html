@@ -605,6 +605,7 @@
         
         .upload-cropper-wrap img {
             cursor: grab;
+            -webkit-user-drag: none;
             left: 50%;
             max-width: none;
             position: absolute;
@@ -614,6 +615,10 @@
         }
         
         .upload-cropper-wrap:active img {
+            cursor: grabbing;
+        }
+
+        .upload-cropper-wrap.is-dragging img {
             cursor: grabbing;
         }
         

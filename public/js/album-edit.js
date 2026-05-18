@@ -81,7 +81,7 @@ function applyCropTransform() {
   if (!image) return;
   image.style.width = `${cropState.baseWidth}px`;
   image.style.height = `${cropState.baseHeight}px`;
-  image.style.transform = `translate(calc(-50% + ${cropState.offsetX}px), calc(-50% + ${cropState.offsetY}px)) scale(${cropState.zoom})`;
+  image.style.transform = `translate(-50%, -50%) translate(${cropState.offsetX}px, ${cropState.offsetY}px) scale(${cropState.zoom})`;
 }
 
 function setupCropImage() {
@@ -110,19 +110,32 @@ function setupCropImage() {
   applyCropTransform();
 }
 
+function scheduleCropSetup() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(setupCropImage);
+  });
+}
+
 function bindCropDrag() {
   const viewport = document.getElementById("cropViewport");
   if (!viewport) return;
 
   viewport.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
     cropState.dragging = true;
     cropState.lastX = event.clientX;
     cropState.lastY = event.clientY;
-    viewport.setPointerCapture(event.pointerId);
+    viewport.classList.add("is-dragging");
+    try {
+      viewport.setPointerCapture(event.pointerId);
+    } catch {
+      // Some browsers do not allow pointer capture during native image drags.
+    }
   });
 
-  viewport.addEventListener("pointermove", (event) => {
+  window.addEventListener("pointermove", (event) => {
     if (!cropState.dragging) return;
+    event.preventDefault();
     cropState.offsetX += event.clientX - cropState.lastX;
     cropState.offsetY += event.clientY - cropState.lastY;
     cropState.lastX = event.clientX;
@@ -130,12 +143,14 @@ function bindCropDrag() {
     applyCropTransform();
   });
 
-  viewport.addEventListener("pointerup", () => {
+  window.addEventListener("pointerup", () => {
     cropState.dragging = false;
+    viewport.classList.remove("is-dragging");
   });
 
-  viewport.addEventListener("pointercancel", () => {
+  window.addEventListener("pointercancel", () => {
     cropState.dragging = false;
+    viewport.classList.remove("is-dragging");
   });
 }
 
@@ -201,13 +216,14 @@ function previewUpload(file) {
   } else {
     uploadContent.innerHTML = `
       <div class="upload-cropper-wrap" id="cropViewport">
-        <img id="cropImage" src="${previewUrl}" alt="预览">
+        <img id="cropImage" src="${previewUrl}" alt="预览" draggable="false">
       </div>
     `;
     const image = document.getElementById("cropImage");
-    image.addEventListener("load", setupCropImage, { once: true });
+    image.ondragstart = () => false;
+    image.addEventListener("load", scheduleCropSetup, { once: true });
     if (image.complete) {
-      setupCropImage();
+      scheduleCropSetup();
     }
     bindCropDrag();
   }
