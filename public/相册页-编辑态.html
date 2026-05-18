@@ -572,13 +572,103 @@
         }
         
         .upload-area.has-image {
+            align-items: center;
+            display: flex;
+            justify-content: center;
             padding: 10px;
         }
         
-        .upload-area img {
+        .upload-area.is-portrait {
+            height: 320px;
+            padding: 0;
+        }
+        
+        .upload-area.is-landscape {
+            height: 250px;
+            padding: 0;
+        }
+        
+        .upload-cropper-wrap {
+            background: #F6EFE6;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            touch-action: none;
+            width: 100%;
+        }
+        
+        .upload-cropper-wrap img {
+            cursor: grab;
+            left: 50%;
+            max-width: none;
+            position: absolute;
+            top: 50%;
+            transform-origin: center center;
+            user-select: none;
+        }
+        
+        .upload-cropper-wrap:active img {
+            cursor: grabbing;
+        }
+        
+        .upload-preview {
+            display: block;
             max-width: 100%;
-            max-height: 200px;
+            max-height: 220px;
             border-radius: 4px;
+            object-fit: contain;
+        }
+        
+        .reselect-row {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            margin: -6px 0 16px;
+        }
+        
+        .reselect-btn {
+            background: rgba(232, 213, 184, 0.55);
+            border: 0;
+            border-radius: 6px;
+            color: #6B4423;
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+        
+        .reselect-btn:hover {
+            background: rgba(212, 196, 168, 0.85);
+        }
+        
+        .reselect-note {
+            color: #9A8369;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .inline-crop-zoom {
+            color: #6B4423;
+            display: grid;
+            font-size: 13px;
+            font-weight: 500;
+            gap: 8px;
+        }
+        
+        .inline-crop-zoom input {
+            width: 100%;
+        }
+        
+        .crop-preview-hint {
+            background: rgba(255, 253, 245, 0.95);
+            border: 1px dashed #D4C4A8;
+            border-radius: 8px;
+            color: #8B7355;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 10px;
+            padding: 12px 14px;
         }
         
         .upload-icon {
@@ -917,7 +1007,7 @@
     <div class="modal-overlay" id="photoModal">
         <div class="modal">
             <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">添加照片</h2>
+                <h2 class="modal-title" id="modalTitle">添加照片或视频</h2>
                 <button class="modal-close" onclick="closeModal()">×</button>
             </div>
             
@@ -930,7 +1020,7 @@
                 <div class="step-line"></div>
                 <div class="step" id="step2Indicator">
                     <span class="step-number">2</span>
-                    <span class="step-text">上传照片</span>
+                    <span class="step-text">上传照片或视频</span>
                 </div>
             </div>
             
@@ -938,7 +1028,7 @@
                 <!-- 步骤1：选择尺寸 -->
                 <div class="step-content" id="step1Content">
                     <div class="form-group">
-                        <label class="form-label">选择照片尺寸</label>
+                        <label class="form-label">选择照片或视频尺寸</label>
                         <div class="size-selector-large">
                             <label class="size-option-large">
                                 <input type="radio" name="photoSize" value="3-4" checked onchange="selectSize('3-4')">
@@ -979,15 +1069,28 @@
                     <div class="upload-area" id="uploadArea" onclick="triggerUpload()">
                         <div id="uploadContent">
                             <div class="upload-icon">📷</div>
-                            <div class="upload-text">点击上传照片</div>
+                            <div class="upload-text">点击上传照片或视频</div>
                             <div class="upload-hint" id="selectedSizeHint">已选：3:4 竖版</div>
                         </div>
                     </div>
-                    <input type="file" id="fileInput" class="hidden-input" accept="image/*" onchange="handleFileSelect(event)">
+                    <input type="file" id="fileInput" class="hidden-input" accept="image/*,video/*" onchange="handleFileSelect(event)">
+                    
+                    <div class="reselect-row" id="reselectRow" style="display: none;">
+                        <button class="reselect-btn" type="button" onclick="triggerUpload()">重新选择照片或视频</button>
+                        <span class="reselect-note">如果需要重新选择尺寸，请点击上一步</span>
+                    </div>
+                    
+                    <div class="form-group" id="zoomGroup" style="display: none;">
+                        <label class="inline-crop-zoom">
+                            缩放
+                            <input id="zoomInput" type="range" min="1" max="3" step="0.01" value="1" oninput="updateCropZoom(this.value)">
+                        </label>
+                        <div class="crop-preview-hint">直接在上方上传框内拖动和缩放，保存后会导出当前画面。</div>
+                    </div>
                     
                     <div class="form-group">
                         <label class="form-label">备注</label>
-                        <input type="text" class="form-input" id="noteInput" placeholder="写下这张照片的故事...">
+                        <input type="text" class="form-input" id="noteInput" placeholder="写下这段照片或视频的故事...">
                     </div>
                 </div>
             </div>
@@ -1060,7 +1163,7 @@
             document.getElementById('uploadArea').classList.remove('has-image');
             document.getElementById('uploadContent').innerHTML = `
                 <div class="upload-icon">📷</div>
-                <div class="upload-text">点击上传照片</div>
+                <div class="upload-text">点击上传照片或视频</div>
                 <div class="upload-hint" id="selectedSizeHint">已选：3:4 竖版</div>
             `;
             document.getElementById('noteInput').value = '';

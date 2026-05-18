@@ -14,26 +14,213 @@ import {
 let selectedSize = "3:4";
 let editingPhoto = null;
 let selectedFile = null;
+let selectedMediaType = "photo";
+let previewUrl = "";
+let cropState = {
+  baseHeight: 0,
+  baseWidth: 0,
+  dragging: false,
+  imageNaturalHeight: 0,
+  imageNaturalWidth: 0,
+  lastX: 0,
+  lastY: 0,
+  offsetX: 0,
+  offsetY: 0,
+  zoom: 1
+};
 let albumId = null;
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function clearPreviewUrl() {
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl);
+    previewUrl = "";
+  }
+}
+
+function resetCropState() {
+  cropState = {
+    baseHeight: 0,
+    baseWidth: 0,
+    dragging: false,
+    imageNaturalHeight: 0,
+    imageNaturalWidth: 0,
+    lastX: 0,
+    lastY: 0,
+    offsetX: 0,
+    offsetY: 0,
+    zoom: 1
+  };
+}
+
+function ratioValue() {
+  return selectedSize === "3:4" ? "3-4" : "4-3";
+}
+
+function selectedSizeText() {
+  return selectedSize === "3:4" ? "3:4 竖版" : "4:3 横版";
+}
+
+function updateSelectedSizeHint() {
+  const hint = document.getElementById("selectedSizeHint");
+  if (hint) {
+    hint.textContent = `已选：${selectedSizeText()}`;
+  }
+}
+
+function applyCropTransform() {
+  const image = document.getElementById("cropImage");
+  if (!image) return;
+  image.style.width = `${cropState.baseWidth}px`;
+  image.style.height = `${cropState.baseHeight}px`;
+  image.style.transform = `translate(calc(-50% + ${cropState.offsetX}px), calc(-50% + ${cropState.offsetY}px)) scale(${cropState.zoom})`;
+}
+
+function setupCropImage() {
+  const image = document.getElementById("cropImage");
+  const viewport = document.getElementById("cropViewport");
+  if (!image || !viewport) return;
+
+  const rect = viewport.getBoundingClientRect();
+  const naturalWidth = image.naturalWidth || 1;
+  const naturalHeight = image.naturalHeight || 1;
+  const coverScale = Math.max(rect.width / naturalWidth, rect.height / naturalHeight);
+
+  cropState.imageNaturalWidth = naturalWidth;
+  cropState.imageNaturalHeight = naturalHeight;
+  cropState.baseWidth = naturalWidth * coverScale;
+  cropState.baseHeight = naturalHeight * coverScale;
+  cropState.offsetX = 0;
+  cropState.offsetY = 0;
+  cropState.zoom = 1;
+
+  const zoomInput = document.getElementById("zoomInput");
+  if (zoomInput) {
+    zoomInput.value = "1";
+  }
+
+  applyCropTransform();
+}
+
+function bindCropDrag() {
+  const viewport = document.getElementById("cropViewport");
+  if (!viewport) return;
+
+  viewport.addEventListener("pointerdown", (event) => {
+    cropState.dragging = true;
+    cropState.lastX = event.clientX;
+    cropState.lastY = event.clientY;
+    viewport.setPointerCapture(event.pointerId);
+  });
+
+  viewport.addEventListener("pointermove", (event) => {
+    if (!cropState.dragging) return;
+    cropState.offsetX += event.clientX - cropState.lastX;
+    cropState.offsetY += event.clientY - cropState.lastY;
+    cropState.lastX = event.clientX;
+    cropState.lastY = event.clientY;
+    applyCropTransform();
+  });
+
+  viewport.addEventListener("pointerup", () => {
+    cropState.dragging = false;
+  });
+
+  viewport.addEventListener("pointercancel", () => {
+    cropState.dragging = false;
+  });
+}
+
+async function createCroppedImageFile() {
+  if (!selectedFile || selectedMediaType === "video") return selectedFile;
+
+  const viewport = document.getElementById("cropViewport");
+  const image = document.getElementById("cropImage");
+  if (!viewport || !image || !cropState.baseWidth || !cropState.baseHeight) {
+    return selectedFile;
+  }
+
+  const outputWidth = selectedSize === "3:4" ? 300 : 400;
+  const outputHeight = selectedSize === "3:4" ? 400 : 300;
+  const rect = viewport.getBoundingClientRect();
+  const scale = cropState.baseWidth / cropState.imageNaturalWidth;
+  const renderedWidth = cropState.baseWidth * cropState.zoom;
+  const renderedHeight = cropState.baseHeight * cropState.zoom;
+  const imageLeft = rect.width / 2 - renderedWidth / 2 + cropState.offsetX;
+  const imageTop = rect.height / 2 - renderedHeight / 2 + cropState.offsetY;
+  const sourceX = Math.max(0, (0 - imageLeft) / (scale * cropState.zoom));
+  const sourceY = Math.max(0, (0 - imageTop) / (scale * cropState.zoom));
+  const sourceWidth = Math.min(cropState.imageNaturalWidth - sourceX, rect.width / (scale * cropState.zoom));
+  const sourceHeight = Math.min(cropState.imageNaturalHeight - sourceY, rect.height / (scale * cropState.zoom));
+
+  const bitmap = await createImageBitmap(selectedFile);
+  const canvas = document.createElement("canvas");
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, outputWidth, outputHeight);
+  context.drawImage(bitmap, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, outputWidth, outputHeight);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("图片裁剪失败，请重新选择照片"));
+          return;
+        }
+        const name = selectedFile.name.replace(/\.[^.]+$/, "") || "photo";
+        resolve(new File([blob], `${name}-cropped.jpg`, { type: "image/jpeg" }));
+      },
+      "image/jpeg",
+      0.92
+    );
+  });
+}
 
 function previewUpload(file) {
   const uploadArea = document.getElementById("uploadArea");
   const uploadContent = document.getElementById("uploadContent");
   uploadArea.classList.add("has-image");
+  uploadArea.onclick = null;
+  uploadArea.classList.toggle("is-portrait", selectedSize === "3:4" && !file.type.startsWith("video/"));
+  uploadArea.classList.toggle("is-landscape", selectedSize === "4:3" && !file.type.startsWith("video/"));
 
-  const previewUrl = URL.createObjectURL(file);
+  clearPreviewUrl();
+  previewUrl = URL.createObjectURL(file);
   if (file.type.startsWith("video/")) {
-    uploadContent.innerHTML = `<video src="${previewUrl}" controls preload="metadata"></video>`;
+    uploadContent.innerHTML = `<video class="upload-preview" src="${previewUrl}" controls preload="metadata"></video>`;
   } else {
-    uploadContent.innerHTML = `<img src="${previewUrl}" alt="预览">`;
+    uploadContent.innerHTML = `
+      <div class="upload-cropper-wrap" id="cropViewport">
+        <img id="cropImage" src="${previewUrl}" alt="预览">
+      </div>
+    `;
+    const image = document.getElementById("cropImage");
+    image.addEventListener("load", setupCropImage, { once: true });
+    bindCropDrag();
   }
+
+  document.getElementById("reselectRow").style.display = "flex";
+  document.getElementById("zoomGroup").style.display = file.type.startsWith("video/") ? "none" : "block";
 }
 
 function resetModal() {
   selectedSize = "3:4";
   editingPhoto = null;
   selectedFile = null;
-  document.getElementById("modalTitle").textContent = "添加照片";
+  selectedMediaType = "photo";
+  clearPreviewUrl();
+  resetCropState();
+  document.getElementById("modalTitle").textContent = "添加照片或视频";
   document.getElementById("stepsIndicator").style.display = "flex";
   document.getElementById("step1Content").style.display = "block";
   document.getElementById("step2Content").style.display = "none";
@@ -43,11 +230,16 @@ function resetModal() {
   document.getElementById("noteInput").value = "";
   document.querySelector('input[name="photoSize"][value="3-4"]').checked = true;
   document.getElementById("uploadArea").classList.remove("has-image");
+  document.getElementById("uploadArea").classList.remove("is-portrait", "is-landscape");
+  document.getElementById("uploadArea").onclick = triggerUpload;
   document.getElementById("uploadContent").innerHTML = `
     <div class="upload-icon">📷</div>
-    <div class="upload-text">点击上传照片</div>
+    <div class="upload-text">点击上传照片或视频</div>
     <div class="upload-hint" id="selectedSizeHint">已选：3:4 竖版</div>
   `;
+  document.getElementById("reselectRow").style.display = "none";
+  document.getElementById("zoomGroup").style.display = "none";
+  document.getElementById("zoomInput").value = "1";
   document.getElementById("fileInput").value = "";
 }
 
@@ -58,6 +250,7 @@ function closeModal() {
 
 function selectSize(size) {
   selectedSize = size === "3-4" ? "3:4" : "4:3";
+  updateSelectedSizeHint();
 }
 
 function nextStep() {
@@ -69,10 +262,7 @@ function nextStep() {
   document.getElementById("backBtn").style.display = "inline-block";
   document.getElementById("nextBtn").textContent = "保存";
   document.getElementById("nextBtn").onclick = savePhoto;
-  const hint = document.getElementById("selectedSizeHint");
-  if (hint) {
-    hint.textContent = `已选：${selectedSize === "3:4" ? "3:4 竖版" : "4:3 横版"}`;
-  }
+  updateSelectedSizeHint();
 }
 
 function goToStep1() {
@@ -88,6 +278,7 @@ function goToStep1() {
 
 function openAddModal() {
   resetModal();
+  document.getElementById("modalTitle").textContent = "添加照片或视频";
   document.getElementById("photoModal").classList.add("active");
 }
 
@@ -97,8 +288,14 @@ function triggerUpload() {
 
 function handleFileSelect(event) {
   const file = event.target.files?.[0];
+  event.target.value = "";
   if (!file) return;
   selectedFile = file;
+  selectedMediaType = file.type.startsWith("video/") ? "video" : "photo";
+  if (selectedMediaType === "video") {
+    selectedSize = "4:3";
+  }
+  resetCropState();
   previewUpload(file);
 }
 
@@ -112,8 +309,8 @@ function renderCard(item) {
   return `
     <div class="photo-card ${sizeClass}" data-id="${item.id}">
       <div class="photo-actions">
-        <button class="edit-btn" data-action="edit">编辑</button>
-        <button class="delete-btn" data-action="delete">删除</button>
+        <button class="photo-action-btn edit-action" data-action="edit" title="编辑">编辑</button>
+        <button class="photo-action-btn delete-action" data-action="delete" title="删除">删除</button>
       </div>
       <div class="photo-image">${mediaTag}</div>
       <div class="photo-note">
@@ -131,10 +328,10 @@ async function renderAlbum() {
 
   const grid = document.querySelector(".photos-grid");
   grid.innerHTML = media.map(renderCard).join("") + `
-    <div class="photo-card add-card" id="addCard">
+    <button class="add-photo-card" id="addCard" type="button">
       <div class="add-icon">+</div>
-      <div class="photo-note">新增照片和备注</div>
-    </div>
+      <span class="add-text">添加照片或视频</span>
+    </button>
   `;
 
   document.getElementById("addCard").addEventListener("click", openAddModal);
@@ -152,20 +349,32 @@ async function renderAlbum() {
 function editPhoto(photo) {
   editingPhoto = photo;
   selectedFile = null;
-  document.getElementById("modalTitle").textContent = "编辑照片";
+  selectedMediaType = photo.media_type === "video" ? "video" : "photo";
+  clearPreviewUrl();
+  resetCropState();
+  document.getElementById("modalTitle").textContent = "编辑照片或视频";
   document.getElementById("stepsIndicator").style.display = "none";
   document.getElementById("step1Content").style.display = "none";
   document.getElementById("step2Content").style.display = "block";
-  document.getElementById("backBtn").style.display = "none";
+  document.getElementById("backBtn").style.display = "inline-block";
   document.getElementById("nextBtn").textContent = "保存";
   document.getElementById("nextBtn").onclick = savePhoto;
   selectedSize = photo.ratio ?? "3:4";
+  const selectedRadio = document.querySelector(`input[name="photoSize"][value="${ratioValue()}"]`);
+  if (selectedRadio) {
+    selectedRadio.checked = true;
+  }
   document.getElementById("noteInput").value = photo.remark || "";
   document.getElementById("uploadArea").classList.add("has-image");
+  document.getElementById("uploadArea").onclick = null;
+  document.getElementById("uploadArea").classList.toggle("is-portrait", selectedSize === "3:4" && photo.media_type !== "video");
+  document.getElementById("uploadArea").classList.toggle("is-landscape", selectedSize === "4:3" && photo.media_type !== "video");
   document.getElementById("uploadContent").innerHTML =
     photo.media_type === "video"
-      ? `<video src="${photo.url}" controls preload="metadata"></video>`
-      : `<img src="${photo.url}" alt="预览">`;
+      ? `<video class="upload-preview" src="${photo.url}" controls preload="metadata"></video>`
+      : `<img class="upload-preview" src="${photo.url}" alt="预览">`;
+  document.getElementById("reselectRow").style.display = "flex";
+  document.getElementById("zoomGroup").style.display = "none";
   document.getElementById("photoModal").classList.add("active");
 }
 
@@ -184,22 +393,24 @@ async function savePhoto() {
     if (editingPhoto) {
       let patch = { remark: note, ratio: selectedSize };
       if (selectedFile) {
-        const storagePath = await uploadMedia(selectedFile, albumId);
+        const fileToUpload = await createCroppedImageFile();
+        const storagePath = await uploadMedia(fileToUpload, albumId);
         patch = {
           ...patch,
           storage_path: storagePath,
-          media_type: selectedFile.type.startsWith("video/") ? "video" : "photo"
+          media_type: selectedMediaType === "video" ? "video" : "photo"
         };
       }
       await updatePhoto(editingPhoto.id, patch);
     } else {
-      const storagePath = await uploadMedia(selectedFile, albumId);
+      const fileToUpload = await createCroppedImageFile();
+      const storagePath = await uploadMedia(fileToUpload, albumId);
       await insertPhoto({
         album_id: albumId,
         user_id: (await requireSession()).user.id,
         storage_path: storagePath,
         ratio: selectedSize,
-        media_type: selectedFile.type.startsWith("video/") ? "video" : "photo",
+        media_type: selectedMediaType === "video" ? "video" : "photo",
         remark: note
       });
     }
@@ -239,6 +450,10 @@ async function init() {
   window.triggerUpload = triggerUpload;
   window.handleFileSelect = handleFileSelect;
   window.savePhoto = savePhoto;
+  window.updateCropZoom = function updateCropZoom(value) {
+    cropState.zoom = Number(value);
+    applyCropTransform();
+  };
 
   await renderAlbum();
 }

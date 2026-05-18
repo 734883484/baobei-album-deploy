@@ -19,20 +19,43 @@ function thumbMarkup(album) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
 }
 
+function formatBabyAgeMessage(babyNickname, babyBirthDate) {
+  if (!babyNickname || !babyBirthDate) {
+    return "记录宝贝成长的每一个瞬间";
+  }
+
+  const birthDate = new Date(`${babyBirthDate}T00:00:00`);
+  if (Number.isNaN(birthDate.getTime())) {
+    return "记录宝贝成长的每一个瞬间";
+  }
+
+  const today = new Date();
+  let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + today.getMonth() - birthDate.getMonth();
+  if (today.getDate() < birthDate.getDate()) {
+    months -= 1;
+  }
+  months = Math.max(0, months);
+
+  if (months < 12) {
+    return `${babyNickname}宝贝今天已经${months}个月啦~`;
+  }
+
+  const years = Math.floor(months / 12);
+  const restMonths = months % 12;
+  return restMonths > 0
+    ? `${babyNickname}宝贝今天已经${years}岁${restMonths}个月啦~`
+    : `${babyNickname}宝贝今天已经${years}岁啦~`;
+}
+
 async function renderAlbums(list, container) {
   container.innerHTML = "";
 
   if (list.length === 0) {
     const empty = document.createElement("div");
-    empty.className = "album-item";
+    empty.className = "album-empty";
     empty.innerHTML = `
-      <div class="album-thumb">${thumbMarkup({})}</div>
-      <div class="album-info">
-        <div class="album-title">还没有相册页</div>
-        <div class="album-meta">点击上方“新建相册页”开始记录</div>
-      </div>
+      <p>还没有相册页，先创建第一本宝贝记录吧。</p>
     `;
-    empty.style.cursor = "default";
     container.appendChild(empty);
     return;
   }
@@ -80,14 +103,20 @@ async function init() {
   }
 
   const subtitle = document.querySelector(".subtitle");
-  subtitle.innerHTML = `记录宝贝成长的每一个瞬间 <a href="#" id="logoutLink" style="color:#6B4423;margin-left:8px;text-decoration:none;">退出</a>`;
-  document.getElementById("logoutLink").addEventListener("click", async (event) => {
+  subtitle.textContent = formatBabyAgeMessage(profile?.baby_nickname, profile?.baby_birth_date);
+  document.getElementById("logoutButton").addEventListener("click", async (event) => {
     event.preventDefault();
     await signOut();
   });
 
   const listContainer = document.querySelector(".album-list");
   const btnNew = document.querySelector(".btn-new");
+  const modal = document.getElementById("createAlbumModal");
+  const createForm = document.getElementById("createAlbumForm");
+  const createInput = document.getElementById("createAlbumName");
+  const cancelCreate = document.getElementById("cancelCreateAlbum");
+  const submitCreate = document.getElementById("submitCreateAlbum");
+  const createMessage = document.getElementById("createAlbumMessage");
   const message = document.createElement("div");
   message.style.display = "none";
   message.style.fontSize = "12px";
@@ -99,14 +128,47 @@ async function init() {
     await renderAlbums(albums, listContainer);
   }
 
-  btnNew.addEventListener("click", async () => {
-    const name = window.prompt("请输入相册名称");
-    if (!name?.trim()) return;
+  function openCreateModal() {
+    createInput.value = "";
+    showMessage(createMessage, "");
+    modal.classList.add("active");
+    setTimeout(() => createInput.focus(), 0);
+  }
+
+  function closeCreateModal() {
+    modal.classList.remove("active");
+    showMessage(createMessage, "");
+  }
+
+  btnNew.addEventListener("click", openCreateModal);
+  cancelCreate.addEventListener("click", closeCreateModal);
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      closeCreateModal();
+    }
+  });
+
+  createForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const name = createInput.value.trim();
+    if (!name) {
+      showMessage(createMessage, "请输入相册名称");
+      return;
+    }
+
+    const originalText = submitCreate.textContent;
+    submitCreate.disabled = true;
+    submitCreate.textContent = "创建中...";
     try {
-      const album = await createAlbum(name.trim());
+      const album = await createAlbum(name);
+      closeCreateModal();
       window.location.href = `${PAGE_URLS.albumEdit}?album=${album.id}`;
     } catch (error) {
+      showMessage(createMessage, error.message || "创建失败");
       showMessage(message, error.message || "创建失败");
+    } finally {
+      submitCreate.disabled = false;
+      submitCreate.textContent = originalText;
     }
   });
 
