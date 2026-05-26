@@ -1,4 +1,5 @@
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { build } from "esbuild";
 import path from "node:path";
 
 const rootDir = process.cwd();
@@ -22,6 +23,15 @@ const configScript = `window.__BAOBEI_CONFIG__ = ${JSON.stringify(
 )};\n`;
 
 await writeFile(path.join(distDir, "app-config.js"), configScript, "utf8");
+
+await build({
+  bundle: true,
+  entryPoints: [path.join(rootDir, "src/easy-cropper.jsx")],
+  format: "iife",
+  globalName: "__BaobeiEasyCropperBundle",
+  logLevel: "silent",
+  outfile: path.join(distDir, "js/easy-cropper.js")
+});
 
 const loginPage = await readFile(path.join(publicDir, "登录页-最终版.html"), "utf8");
 await writeFile(path.join(distDir, "index.html"), loginPage, "utf8");

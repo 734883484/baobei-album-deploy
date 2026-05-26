@@ -1094,7 +1094,7 @@
                     <div class="form-group" id="zoomGroup" style="display: none;">
                         <label class="inline-crop-zoom">
                             缩放
-                            <input id="zoomInput" type="range" min="1" max="3" step="0.01" value="1" oninput="updateCropZoom(this.value)">
+                            <input id="zoomInput" type="range" min="0.2" max="3" step="0.01" value="1" oninput="updateCropZoom(this.value)">
                         </label>
                         <div class="crop-preview-hint">直接在上方上传框内拖动和缩放，保存后会导出当前画面。</div>
                     </div>
@@ -1257,6 +1257,7 @@
         }
     </script>
     <script src="./app-config.js"></script>
+    <script src="./js/easy-cropper.js"></script>
     <script type="module" src="./js/album-edit.js"></script>
 </body>
 </html>
