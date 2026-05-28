@@ -21,12 +21,12 @@ function thumbMarkup(album) {
 
 function formatBabyAgeMessage(babyNickname, babyBirthDate) {
   if (!babyNickname || !babyBirthDate) {
-    return "一起记录慢慢长大的每一天";
+    return "宝宝昵称已经xx个月了，一起记录慢慢长大的每一天";
   }
 
   const birthDate = new Date(`${babyBirthDate}T00:00:00`);
   if (Number.isNaN(birthDate.getTime())) {
-    return "一起记录慢慢长大的每一天";
+    return "宝宝昵称已经xx个月了，一起记录慢慢长大的每一天";
   }
 
   const today = new Date();
@@ -37,14 +37,13 @@ function formatBabyAgeMessage(babyNickname, babyBirthDate) {
   months = Math.max(0, months);
 
   if (months < 12) {
-    return `${babyNickname}今天已经${months}个月啦，一起记录慢慢长大的每一天`;
+    return `${babyNickname}已经${months}个月了，一起记录慢慢长大的每一天`;
   }
 
   const years = Math.floor(months / 12);
   const restMonths = months % 12;
-  return restMonths > 0
-    ? `${babyNickname}今天已经${years}岁${restMonths}个月啦，一起记录慢慢长大的每一天`
-    : `${babyNickname}今天已经${years}岁啦，一起记录慢慢长大的每一天`;
+  const ageText = restMonths > 0 ? `${years}岁${restMonths}月` : `${years}岁`;
+  return `${babyNickname}已经${ageText}了，一起记录慢慢长大的每一天`;
 }
 
 async function renderAlbums(list, container, profile) {
