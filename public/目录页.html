@@ -6,156 +6,277 @@
     <title>宝贝成长日记 - 目录</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --paper: #fffaf0;
+            --paper-deep: #f7ecda;
+            --brown: #60391f;
+            --brown-soft: #8b642f;
+            --line: #d6bea0;
+        }
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #FDF6E8 0%, #FAF0E0 50%, #F5E8D5 100%);
-            display: flex; justify-content: center; align-items: center;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
-            padding: 40px 20px;
+            background:
+                radial-gradient(circle at 50% 45%, rgba(255, 253, 244, 0.86) 0 22%, transparent 48%),
+                linear-gradient(135deg, #fdf4df 0%, #fbecd6 52%, #f7dfbd 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+            padding: 56px 34px;
         }
         body::before {
-            content: ''; position: fixed; inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.58' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
             pointer-events: none;
         }
-        .scene { position: relative; width: 100%; max-width: 600px; }
+        .scene {
+            position: relative;
+            width: min(100%, 1132px);
+            min-height: 740px;
+        }
         .shadow-layer {
-            position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-            width: 92%; height: 30px;
-            background: radial-gradient(ellipse at center, rgba(139, 90, 43, 0.25) 0%, transparent 70%);
-            filter: blur(8px); z-index: 0;
+            position: absolute;
+            left: 146px;
+            right: 70px;
+            bottom: -18px;
+            height: 48px;
+            background: radial-gradient(ellipse at center, rgba(96, 57, 31, 0.22) 0%, rgba(96, 57, 31, 0.06) 48%, transparent 76%);
+            filter: blur(13px);
+            z-index: 0;
         }
         .paper-back {
-            position: absolute; top: 12px; left: 50%; transform: translateX(-50%) rotate(1.5deg);
-            width: 550px; height: 600px;
-            background: linear-gradient(135deg, #F5E6D3 0%, #EDE0D0 100%);
-            border-radius: 10px;
-            box-shadow: 0 8px 25px rgba(139, 90, 43, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            position: absolute;
+            top: 70px;
+            left: 104px;
+            width: 960px;
+            height: 700px;
+            border-radius: 22px;
+            background: rgba(235, 213, 185, 0.34);
+            box-shadow: 0 36px 54px rgba(108, 69, 37, 0.11);
+            transform: translate(42px, 38px);
             z-index: 1;
         }
         .album {
-            position: relative; width: 550px;
-            background: linear-gradient(145deg, #FEFCF5 0%, #FBF5E8 30%, #F7EED8 100%);
-            border-radius: 10px 10px 10px 8px;
-            box-shadow: 0 25px 60px rgba(139, 90, 43, 0.2), 0 10px 25px rgba(139, 90, 43, 0.12),
-                        inset 0 2px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(139, 90, 43, 0.1);
-            z-index: 2; overflow: hidden;
+            position: relative;
+            width: 1072px;
+            min-height: 700px;
+            margin: 0 auto;
+            border-radius: 0 22px 22px 22px;
+            background:
+                linear-gradient(90deg, rgba(255,255,255,0.68) 0, rgba(255,255,255,0) 15%),
+                linear-gradient(145deg, #fffdf6 0%, #fff8ea 56%, #fbecd8 100%);
+            box-shadow:
+                0 28px 58px rgba(108, 69, 37, 0.18),
+                0 8px 20px rgba(108, 69, 37, 0.11),
+                inset 0 1px 0 rgba(255, 255, 255, 0.78);
+            overflow: visible;
+            z-index: 2;
         }
         .album::before {
-            content: ''; position: absolute; inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.8' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.4 0 0 0 0 0.25 0 0 0 0.015 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
-            pointer-events: none; z-index: 1;
-        }
-        .album::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%);
-            pointer-events: none; z-index: 2; border-radius: 10px 10px 0 0;
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.74' numOctaves='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.4 0 0 0 0 0.25 0 0 0 0.018 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
         }
         .spine {
-            position: absolute; left: 0; top: 0; bottom: 0; width: 28px;
-            background: linear-gradient(90deg, #4A2C17 0%, #5D3A1E 20%, #6B4423 40%, #5D3A1E 60%, #4A2C17 100%);
-            border-radius: 10px 0 0 10px; z-index: 10;
-            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15), inset -1px 0 3px rgba(255, 255, 255, 0.1);
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            border-radius: 22px 0 0 22px;
+            background:
+                linear-gradient(90deg, rgba(61, 32, 15, 0.4), transparent 18%, transparent 78%, rgba(40, 22, 12, 0.38)),
+                linear-gradient(180deg, #5c3217 0%, #7b461f 42%, #5a3117 100%);
+            box-shadow: 6px 0 16px rgba(64, 37, 19, 0.28), inset -5px 0 13px rgba(255, 210, 137, 0.09);
+            z-index: 5;
         }
         .spine::before {
-            content: ''; position: absolute; left: 10px; top: 25px; bottom: 25px; width: 2px;
-            background: repeating-linear-gradient(180deg, transparent, transparent 10px, #8B6914 10px, #8B6914 12px);
-            opacity: 0.6;
-        }
-        .spine::after {
-            content: ''; position: absolute; left: 3px; top: 0; bottom: 0; width: 4px;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), transparent);
+            content: "";
+            position: absolute;
+            left: 25px;
+            top: 70px;
+            bottom: 70px;
+            width: 2px;
+            border-radius: 2px;
+            background: repeating-linear-gradient(180deg, #b77823 0 4px, transparent 4px 18px);
+            opacity: 0.72;
         }
         .rings {
-            position: absolute; left: 28px; top: 0; bottom: 0; width: 20px;
-            display: flex; flex-direction: column; justify-content: space-around; padding: 40px 0; z-index: 5;
+            position: absolute;
+            left: 55px;
+            top: 112px;
+            bottom: 160px;
+            width: 34px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 6;
         }
         .ring-hole {
-            width: 14px; height: 14px; border-radius: 50%;
-            background: linear-gradient(135deg, #E8D5B8 0%, #D4C4A8 100%);
-            box-shadow: inset 2px 2px 4px rgba(139, 90, 43, 0.2), inset -1px -1px 2px rgba(255, 255, 255, 0.5);
-        }
-        .buckle {
-            position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
-            width: 45px; height: 60px;
-            background: linear-gradient(180deg, #5D3A1E 0%, #4A2C17 100%);
-            border-radius: 4px; z-index: 10;
-            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.25), inset 1px 1px 2px rgba(255, 255, 255, 0.1);
-        }
-        .buckle::before {
-            content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px; width: 1px;
-            background: repeating-linear-gradient(180deg, transparent, transparent 6px, #8B6914 6px, #8B6914 8px);
-            opacity: 0.5;
-        }
-        .buckle-btn {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            width: 15px; height: 15px;
-            background: radial-gradient(circle at 30% 30%, #FFE082 0%, #FFB300 50%, #E65100 100%);
+            width: 29px;
+            height: 29px;
             border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+            background: linear-gradient(135deg, #ead9bd, #d5bb95);
+            box-shadow: inset 3px 3px 7px rgba(110, 70, 35, 0.18), inset -2px -2px 5px rgba(255,255,255,0.65), 0 2px 6px rgba(98, 62, 31, 0.1);
         }
         .content {
-            position: relative; margin-left: 55px; padding: 35px 35px 30px 25px; z-index: 3;
+            position: relative;
+            z-index: 3;
+            margin-left: 60px;
+            min-height: 700px;
+            padding: 82px 104px 70px;
         }
-        .header { text-align: center; margin-bottom: 20px; }
-        .main-title { font-size: 24px; font-weight: 700; color: #5D3A1E; letter-spacing: 2px; margin-bottom: 4px; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5); }
-        .subtitle { font-size: 11px; color: #8B6914; }
-        .heart { font-size: 10px; }
-        
-        /* 新建按钮 */
-        .btn-new {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; height: 50px;
-            background: linear-gradient(180deg, #FBF5E8 0%, #F5EED8 100%);
-            border: 2px dashed #D4C4A8; border-radius: 10px;
-            font-size: 15px; color: #8B6914; cursor: pointer;
-            margin-bottom: 16px; transition: all 0.2s;
-        }
-        .btn-new:hover { background: linear-gradient(180deg, #F5EED8 0%, #EDE0D0 100%); border-color: #A68B5B; }
-        .btn-new svg { width: 20px; height: 20px; }
-        
-        /* 相册列表 */
-        .album-list { display: flex; flex-direction: column; gap: 10px; }
-        .album-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px; background: linear-gradient(180deg, #FFFEFA 0%, #FFF9F0 100%);
-            border: 1.5px solid #D4C4A8; border-radius: 10px;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .album-item:hover { border-color: #A68B5B; box-shadow: 0 2px 8px rgba(139, 90, 43, 0.1); }
-        .album-item.active { background: linear-gradient(180deg, #F5E6D3 0%, #EDE0D0 100%); border-color: #8B6914; }
-        .album-thumb {
-            width: 60px; height: 45px;
-            background: linear-gradient(135deg, #E8DCC8 0%, #D4C4A8 100%);
-            border-radius: 6px; overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .album-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .album-thumb svg { width: 24px; height: 24px; color: #A68B5B; }
-        .album-info { flex: 1; }
-        .album-title { font-size: 14px; font-weight: 600; color: #5D3A1E; margin-bottom: 2px; }
-        .album-meta { font-size: 11px; color: #8B7355; }
-        .album-edit { width: 20px; height: 20px; color: #A68B5B; cursor: pointer; }
-        .album-empty {
-            padding: 18px 16px;
-            background: linear-gradient(180deg, #FFFEFA 0%, #FFF9F0 100%);
-            border: 1.5px solid #E8DCC8;
-            border-radius: 10px;
-            color: #8B7355;
+        .header {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 48px;
+        }
+        .main-title {
+            color: var(--brown);
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            line-height: 1.12;
+            margin-bottom: 24px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.55);
+        }
+        .subtitle {
+            color: #805c2f;
+            font-size: 18px;
+            line-height: 1.4;
+            margin-bottom: 22px;
+        }
+        .heart {
+            display: block;
+            font-size: 27px;
+            line-height: 1;
+        }
+        .btn-new {
+            width: 100%;
+            height: 145px;
+            border: 3px dashed var(--line);
+            border-radius: 18px;
+            background: rgba(255, 248, 235, 0.48);
+            color: #8a5c20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            font-size: 29px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 46px;
+            transition: background 0.16s ease, border-color 0.16s ease;
+        }
+        .btn-new:hover {
+            background: rgba(250, 236, 213, 0.72);
+            border-color: #ba9c75;
+        }
+        .btn-new svg {
+            width: 30px;
+            height: 30px;
+            stroke-width: 2.4;
+        }
+        .album-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .album-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 18px 20px;
+            min-height: 116px;
+            border: 2px solid #e9d9bf;
+            border-radius: 16px;
+            background: rgba(255, 253, 247, 0.76);
+            cursor: pointer;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+        .album-item:hover {
+            border-color: #c8aa80;
+            box-shadow: 0 8px 20px rgba(118, 78, 39, 0.1);
+        }
+        .album-thumb {
+            width: 98px;
+            height: 76px;
+            flex: 0 0 98px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #e7d7bd, #d4bd99);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .album-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .album-thumb svg {
+            width: 35px;
+            height: 35px;
+            color: #9b773e;
+        }
+        .album-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .album-title {
+            color: var(--brown);
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+        .album-meta {
+            color: #8b6d4e;
+            font-size: 15px;
+        }
+        .album-edit {
+            width: 24px;
+            height: 24px;
+            color: #a38352;
+        }
+        .album-empty {
+            min-height: 260px;
+            border: 2px solid #eadbc3;
+            border-radius: 18px;
+            background: rgba(255, 253, 247, 0.62);
+            color: #6d4d2b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 44px;
+            padding: 36px 48px;
+            font-size: 29px;
+            line-height: 1.85;
+            text-align: left;
+        }
+        .empty-illustration {
+            width: 132px;
+            height: 98px;
+            opacity: 0.2;
+            flex: 0 0 132px;
+            color: #c6a980;
         }
         .directory-actions {
             display: flex;
             justify-content: center;
-            margin-top: 16px;
+            margin-top: 60px;
         }
         .directory-ghost {
-            background: transparent;
             border: 0;
-            color: #8B7355;
+            background: transparent;
+            color: #8a745f;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 22px;
+            line-height: 1;
         }
         .modal-backdrop {
             position: fixed;
@@ -163,97 +284,157 @@
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 24px;
-            background: rgba(91, 61, 36, 0.24);
+            padding: 52px;
+            background: rgba(255, 246, 229, 0.12);
             z-index: 30;
         }
-        .modal-backdrop.active { display: flex; }
+        .modal-backdrop.active {
+            display: flex;
+        }
         .directory-modal {
-            width: min(100%, 420px);
-            max-width: 420px;
-            padding: 28px 24px 22px;
-            background: linear-gradient(145deg, #FEFCF5 0%, #FBF5E8 30%, #F7EED8 100%);
-            border: 1px solid rgba(212, 196, 168, 0.9);
-            border-radius: 18px;
-            box-shadow: 0 24px 60px rgba(139, 90, 43, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+            position: relative;
+            width: 538px;
+            margin-left: 380px;
+            margin-top: 170px;
+            padding: 32px 32px 30px;
+            border: 1px solid rgba(235, 222, 201, 0.9);
+            border-radius: 24px;
+            background: linear-gradient(145deg, #fffdf6 0%, #fff6e6 100%);
+            box-shadow: 28px 0 0 rgba(220, 193, 156, 0.22), 0 30px 58px rgba(112, 72, 38, 0.22), inset 0 1px 0 rgba(255,255,255,0.8);
         }
         .directory-modal-title {
-            margin: 0 0 18px;
-            color: #5D3A1E;
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 1px;
+            color: var(--brown);
+            font-size: 29px;
+            font-weight: 800;
             text-align: center;
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+        .directory-modal-intro {
+            color: #9b743e;
+            font-size: 16px;
+            text-align: center;
+            line-height: 1.45;
+            margin-bottom: 26px;
         }
         .directory-modal-form {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 18px;
+        }
+        .directory-field {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
         }
         .directory-modal-label {
-            display: block;
-            margin: 0 0 -4px;
-            color: #5D3A1E;
-            font-size: 13px;
+            color: var(--brown);
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .directory-modal-input,
+        .directory-modal-textarea {
+            width: 100%;
+            border: 1.5px solid #cdb18d;
+            border-radius: 10px;
+            background: rgba(255, 253, 247, 0.78);
+            color: var(--brown);
+            font: inherit;
+            font-size: 17px;
+            outline: none;
+            box-shadow: inset 0 1px 2px rgba(122, 80, 40, 0.04);
         }
         .directory-modal-input {
-            width: 100%;
-            height: 48px;
-            padding: 0 16px;
-            background: linear-gradient(180deg, #FFFEFA 0%, #FFF9F0 100%);
-            border: 1.5px solid #D4C4A8;
-            border-radius: 12px;
-            box-shadow: inset 0 2px 4px rgba(139, 90, 43, 0.05);
-            color: #5D3A1E;
-            font-size: 15px;
-            outline: none;
+            height: 55px;
+            padding: 0 18px;
         }
-        .directory-modal-input:focus {
-            border-color: #A68B5B;
-            box-shadow: 0 0 0 3px rgba(166, 139, 91, 0.14);
+        .directory-modal-textarea {
+            min-height: 100px;
+            padding: 16px 18px;
+            resize: vertical;
         }
-        .directory-modal-input::placeholder { color: #B8A07A; }
+        .directory-date-wrap {
+            position: relative;
+        }
+        .directory-date-wrap .directory-modal-input {
+            padding-right: 52px;
+        }
+        .calendar-mark {
+            position: absolute;
+            right: 17px;
+            top: 50%;
+            width: 22px;
+            height: 22px;
+            transform: translateY(-50%);
+            color: #9a733f;
+            pointer-events: none;
+        }
+        .directory-modal-input::placeholder,
+        .directory-modal-textarea::placeholder {
+            color: #aa9888;
+        }
+        .directory-modal-input:focus,
+        .directory-modal-textarea:focus {
+            border-color: #9c6f38;
+            box-shadow: 0 0 0 3px rgba(156, 111, 56, 0.12);
+        }
+        .message {
+            color: #a34f3f;
+        }
         .directory-modal-actions {
             display: flex;
-            gap: 12px;
             justify-content: flex-end;
-            margin-top: 4px;
+            gap: 26px;
+            margin-top: 12px;
         }
         .directory-modal-ghost,
         .directory-modal-submit {
-            min-width: 96px;
-            height: 42px;
-            padding: 0 18px;
+            min-width: 116px;
+            height: 55px;
             border: 0;
-            border-radius: 999px;
+            border-radius: 28px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 700;
         }
         .directory-modal-ghost {
-            background: rgba(255, 248, 236, 0.95);
-            color: #8B7355;
+            background: rgba(255, 253, 247, 0.92);
+            color: #6d4d2b;
+            box-shadow: 0 12px 22px rgba(112, 72, 38, 0.08);
         }
         .directory-modal-submit {
-            background: linear-gradient(180deg, #6B4423 0%, #5D3A1E 100%);
-            color: #FFF8E7;
-            box-shadow: 0 4px 12px rgba(139, 90, 43, 0.22);
+            min-width: 152px;
+            color: #fff9eb;
+            background: linear-gradient(180deg, #855225 0%, #643719 100%);
+            box-shadow: 0 10px 18px rgba(85, 47, 22, 0.26), inset 0 1px 0 rgba(255,255,255,0.16);
         }
-        
-        /* 装饰小熊 */
-        .deco-bear {
-            position: absolute; left: -20px; bottom: 10px; width: 80px; z-index: 10;
+        @media (max-width: 900px) {
+            body { padding: 28px 18px; }
+            .scene { min-height: 0; }
+            .paper-back { display: none; }
+            .album { width: 100%; min-height: 620px; }
+            .content { padding: 54px 34px 42px; }
+            .main-title { font-size: 32px; }
+            .subtitle { font-size: 15px; }
+            .btn-new { height: 104px; font-size: 24px; }
+            .album-empty { min-height: 210px; font-size: 22px; gap: 22px; }
+            .empty-illustration { width: 92px; flex-basis: 92px; }
+            .directory-modal { width: min(100%, 538px); margin: 0; }
         }
-        
-        @media (max-width: 600px) {
-            .album { width: 100%; max-width: 400px; }
-            .paper-back { width: 100%; max-width: 390px; height: auto; min-height: 550px; }
-            .content { padding: 30px 25px 25px 20px; }
-            .deco-bear { display: none; }
-            .directory-modal { padding: 24px 18px 18px; }
-            .directory-modal-actions { flex-direction: column-reverse; }
+        @media (max-width: 560px) {
+            .album { border-radius: 0 18px 18px 18px; }
+            .spine { width: 44px; }
+            .rings { left: 39px; }
+            .content { margin-left: 44px; padding: 42px 20px 34px; }
+            .main-title { font-size: 28px; }
+            .subtitle { font-size: 13px; }
+            .btn-new { height: 86px; font-size: 20px; }
+            .album-empty { padding: 24px 18px; font-size: 18px; text-align: center; flex-direction: column; }
+            .directory-actions { margin-top: 38px; }
+            .directory-modal { padding: 28px 22px 24px; }
+            .directory-modal-actions { gap: 12px; }
             .directory-modal-ghost,
-            .directory-modal-submit { width: 100%; }
+            .directory-modal-submit { min-width: 0; flex: 1; }
         }
     </style>
 </head>
@@ -268,8 +449,8 @@
             
             <div class="content">
                 <div class="header">
-                    <h1 class="main-title">宝宝昵称成长日记</h1>
-                    <p class="subtitle">宝宝昵称已经xx个月了，一起记录慢慢长大的每一天</p>
+                    <h1 class="main-title">小九成长日记</h1>
+                    <p class="subtitle">小九宝贝今天已经9个月啦，一起记录慢慢长大的每一天</p>
                     <span class="heart">💗</span>
                 </div>
                 
@@ -280,7 +461,18 @@
                 
                 <div class="album-list">
                     <div class="album-empty">
-                        <p>还没有日记，先写下宝宝昵称今天的一个小瞬间吧</p>
+                        <svg class="empty-illustration" viewBox="0 0 128 96" fill="none" aria-hidden="true">
+                            <circle cx="62" cy="50" r="26" fill="currentColor" opacity="0.38"/>
+                            <circle cx="43" cy="34" r="11" fill="currentColor" opacity="0.38"/>
+                            <circle cx="82" cy="34" r="11" fill="currentColor" opacity="0.38"/>
+                            <circle cx="53" cy="49" r="3" fill="#fff7e8"/>
+                            <circle cx="72" cy="49" r="3" fill="#fff7e8"/>
+                            <path d="M55 62c6 5 13 5 19 0" stroke="#fff7e8" stroke-width="4" stroke-linecap="round"/>
+                            <path d="M29 90c5-18 20-28 35-28s30 10 35 28" fill="currentColor" opacity="0.35"/>
+                            <path d="M75 16c7-7 16-8 25-4-4 8-11 13-22 14" fill="currentColor" opacity="0.3"/>
+                            <path d="M66 21c-4-9-11-14-22-14 2 10 8 17 19 20" fill="currentColor" opacity="0.22"/>
+                        </svg>
+                        <p>还没有日记，先写下小九<br>今天的一个小瞬间吧。</p>
                     </div>
                 </div>
                 <div class="directory-actions">
@@ -291,14 +483,31 @@
     </div>
     <div class="modal-backdrop" id="createAlbumModal" role="presentation">
         <div class="directory-modal" role="dialog" aria-modal="true" aria-labelledby="createAlbumTitle">
-            <h2 class="directory-modal-title" id="createAlbumTitle">新建相册页</h2>
+            <h2 class="directory-modal-title" id="createAlbumTitle">写成长日记</h2>
+            <p class="directory-modal-intro">先写下今天的时间和主题，留下一个成长瞬间</p>
             <form class="directory-modal-form" id="createAlbumForm">
-                <label class="directory-modal-label" for="createAlbumName">相册名称</label>
-                <input class="directory-modal-input" id="createAlbumName" maxlength="40" placeholder="例如：小九的春天" type="text">
+                <div class="directory-field">
+                    <label class="directory-modal-label" for="diaryDate">时间</label>
+                    <div class="directory-date-wrap">
+                        <input class="directory-modal-input" id="diaryDate" readonly type="text" value="2026年5月28日 · 星期四">
+                        <svg class="calendar-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="2"/>
+                            <path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="directory-field">
+                    <label class="directory-modal-label" for="diaryTopic">主题</label>
+                    <input class="directory-modal-input" id="diaryTopic" maxlength="40" placeholder="例如：第一次会扶站啦" type="text">
+                </div>
+                <div class="directory-field">
+                    <label class="directory-modal-label" for="diaryNote">一句话记录（选填）</label>
+                    <textarea class="directory-modal-textarea" id="diaryNote" maxlength="120" placeholder="例如：今天自己扶着沙发站了好久，笑得特别开心"></textarea>
+                </div>
                 <div class="message" id="createAlbumMessage" style="display:none;font-size:12px;"></div>
                 <div class="directory-modal-actions">
                     <button class="directory-modal-ghost" id="cancelCreateAlbum" type="button">取消</button>
-                    <button class="directory-modal-submit" id="submitCreateAlbum" type="submit">创建相册</button>
+                    <button class="directory-modal-submit" id="submitCreateAlbum" type="submit">开始写日记</button>
                 </div>
             </form>
         </div>
