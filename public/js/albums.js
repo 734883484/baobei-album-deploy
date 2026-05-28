@@ -21,12 +21,12 @@ function thumbMarkup(album) {
 
 function formatBabyAgeMessage(babyNickname, babyBirthDate) {
   if (!babyNickname || !babyBirthDate) {
-    return "记录宝贝成长的每一个瞬间";
+    return "一起记录慢慢长大的每一天";
   }
 
   const birthDate = new Date(`${babyBirthDate}T00:00:00`);
   if (Number.isNaN(birthDate.getTime())) {
-    return "记录宝贝成长的每一个瞬间";
+    return "一起记录慢慢长大的每一天";
   }
 
   const today = new Date();
@@ -37,24 +37,25 @@ function formatBabyAgeMessage(babyNickname, babyBirthDate) {
   months = Math.max(0, months);
 
   if (months < 12) {
-    return `${babyNickname}宝贝今天已经${months}个月啦~`;
+    return `${babyNickname}今天已经${months}个月啦，一起记录慢慢长大的每一天`;
   }
 
   const years = Math.floor(months / 12);
   const restMonths = months % 12;
   return restMonths > 0
-    ? `${babyNickname}宝贝今天已经${years}岁${restMonths}个月啦~`
-    : `${babyNickname}宝贝今天已经${years}岁啦~`;
+    ? `${babyNickname}今天已经${years}岁${restMonths}个月啦，一起记录慢慢长大的每一天`
+    : `${babyNickname}今天已经${years}岁啦，一起记录慢慢长大的每一天`;
 }
 
-async function renderAlbums(list, container) {
+async function renderAlbums(list, container, profile) {
   container.innerHTML = "";
 
   if (list.length === 0) {
+    const babyName = profile?.baby_nickname || "宝宝";
     const empty = document.createElement("div");
     empty.className = "album-empty";
     empty.innerHTML = `
-      <p>还没有相册页，先创建第一本宝贝记录吧。</p>
+      <p>还没有日记，先写下${babyName}今天的一个小瞬间吧</p>
     `;
     container.appendChild(empty);
     return;
@@ -81,7 +82,7 @@ async function renderAlbums(list, container) {
       try {
         await updateAlbum(album.id, { name: nextName });
         const refreshed = await fetchAlbums();
-        await renderAlbums(refreshed, container);
+        await renderAlbums(refreshed, container, profile);
       } catch (error) {
         window.alert(error.message || "修改失败");
       }
@@ -99,7 +100,7 @@ async function init() {
   }
   const title = document.querySelector(".main-title");
   if (profile?.baby_nickname) {
-    title.textContent = `${profile.baby_nickname}相册`;
+    title.textContent = `${profile.baby_nickname}成长日记`;
   }
 
   const subtitle = document.querySelector(".subtitle");
@@ -125,7 +126,7 @@ async function init() {
 
   async function refresh() {
     const albums = await fetchAlbums();
-    await renderAlbums(albums, listContainer);
+    await renderAlbums(albums, listContainer, profile);
   }
 
   function openCreateModal() {
