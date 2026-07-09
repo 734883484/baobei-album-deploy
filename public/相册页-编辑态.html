@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>宝贝相册 - 相册编辑</title>
+    <title>成长日记 - 编辑</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -960,6 +960,350 @@
         .hidden-input {
             display: none;
         }
+
+        .scene {
+            max-width: 1180px;
+        }
+
+        .paper-back {
+            left: calc(50% + 36px);
+            width: 1080px;
+            height: 740px;
+            border-radius: 20px;
+            transform: translateX(-50%) rotate(0deg);
+            background: rgba(237, 215, 190, 0.42);
+        }
+
+        .album {
+            width: 1080px;
+            min-height: 740px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, #FFFDF7 0%, #FBF3E4 58%, #F4E2C8 100%);
+        }
+
+        .spine {
+            width: 58px;
+            border-radius: 20px 0 0 20px;
+        }
+
+        .spine::before {
+            left: 25px;
+            top: 62px;
+            bottom: 62px;
+        }
+
+        .rings {
+            left: 58px;
+            width: 32px;
+            padding: 92px 0 74px;
+        }
+
+        .ring-hole {
+            width: 24px;
+            height: 24px;
+        }
+
+        .buckle {
+            right: -34px;
+            width: 62px;
+            height: 92px;
+            border-radius: 8px;
+        }
+
+        .content {
+            margin-left: 92px;
+            padding: 54px 62px 64px 38px;
+        }
+
+        .top-bar {
+            top: 28px;
+            right: 34px;
+        }
+
+        .top-btn {
+            border-radius: 999px;
+            padding: 10px 18px;
+            background: rgba(255, 250, 239, 0.92);
+            border-color: #E0CDAE;
+            color: #6A4328;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .top-btn.done-btn {
+            background: linear-gradient(135deg, #C49A2C 0%, #AC7F12 100%);
+            color: #FFF8EA;
+        }
+
+        .header {
+            margin-bottom: 34px;
+        }
+
+        .album-title {
+            color: #54331F;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: 4px;
+        }
+
+        .album-date {
+            align-items: center;
+            color: #9F6B1A;
+            display: flex;
+            font-size: 16px;
+            font-weight: 700;
+            gap: 8px;
+            justify-content: center;
+            letter-spacing: 0;
+            margin-top: 14px;
+        }
+
+        .date-heart {
+            color: #A8671D;
+            font-size: 15px;
+        }
+
+        .date-leaf {
+            color: #B88A35;
+            font-size: 15px;
+        }
+
+        .diary-main {
+            display: grid;
+            gap: 34px;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .media-panel,
+        .story-panel {
+            background: rgba(255, 253, 246, 0.78);
+            border: 1px solid rgba(219, 196, 163, 0.85);
+            border-radius: 18px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 14px 28px rgba(121, 78, 36, 0.08);
+            min-height: 470px;
+            padding: 26px;
+        }
+
+        .panel-heading {
+            align-items: center;
+            display: flex;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .panel-icon {
+            align-items: center;
+            background: linear-gradient(145deg, #E8D7BB, #DCC39C);
+            border-radius: 12px;
+            color: #9A6A21;
+            display: flex;
+            font-size: 24px;
+            height: 54px;
+            justify-content: center;
+            width: 54px;
+        }
+
+        .panel-title {
+            color: #58341E;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .panel-subtitle {
+            color: #9B7B5A;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 3px;
+        }
+
+        .photos-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            justify-content: stretch;
+            padding: 0;
+        }
+
+        .photo-card,
+        .add-photo-card,
+        .photo-placeholder {
+            aspect-ratio: 1 / 1;
+            border-radius: 14px;
+            height: auto;
+            overflow: hidden;
+            position: relative;
+            transform: none !important;
+            width: auto;
+        }
+
+        .photo-card {
+            background: #EFE3CE;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .photo-card.size-3-4,
+        .photo-card.size-4-3 {
+            width: auto;
+        }
+
+        .photo-card.size-3-4 .photo-image,
+        .photo-card.size-4-3 .photo-image,
+        .photo-image {
+            height: 100%;
+            width: 100%;
+        }
+
+        .photo-note {
+            display: none;
+        }
+
+        .photo-actions {
+            right: 8px;
+            top: 8px;
+        }
+
+        .edit-action {
+            display: none;
+        }
+
+        .delete-action {
+            background: rgba(85, 55, 33, 0.8);
+            color: #FFF8EA;
+            font-size: 0;
+            height: 26px;
+            width: 26px;
+        }
+
+        .delete-action::before {
+            content: "×";
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .add-photo-card {
+            background: #EFE3CE;
+            border: 2px dashed #D2B892;
+            color: #A27324;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .add-icon {
+            background: transparent;
+            border-radius: 0;
+            color: #A27324;
+            font-size: 36px;
+            height: auto;
+            margin: 0;
+            width: auto;
+        }
+
+        .add-text {
+            color: #A27324;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .photo-placeholder {
+            align-items: center;
+            background: #E9DCC7;
+            color: rgba(128, 95, 58, 0.6);
+            display: flex;
+            justify-content: center;
+        }
+
+        .photo-placeholder::before {
+            content: "×";
+            position: absolute;
+            right: 10px;
+            top: 6px;
+        }
+
+        .photo-placeholder-icon {
+            border: 3px solid currentColor;
+            border-radius: 7px;
+            height: 38px;
+            position: relative;
+            width: 42px;
+        }
+
+        .photo-placeholder-icon::before {
+            content: "";
+            background: currentColor;
+            border-radius: 999px;
+            height: 7px;
+            left: 8px;
+            position: absolute;
+            top: 8px;
+            width: 7px;
+        }
+
+        .photo-placeholder-icon::after {
+            content: "";
+            border-bottom: 12px solid currentColor;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            bottom: 7px;
+            left: 9px;
+            position: absolute;
+        }
+
+        .added-count {
+            color: #9B7B5A;
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .story-textarea-wrap {
+            background:
+                repeating-linear-gradient(to bottom, transparent 0, transparent 41px, rgba(202, 171, 130, 0.52) 42px, transparent 43px),
+                rgba(255, 252, 244, 0.72);
+            border-radius: 12px;
+            min-height: 338px;
+            padding: 18px 20px 46px;
+            position: relative;
+        }
+
+        .story-input {
+            background: transparent;
+            border: 0;
+            color: #5C3A25;
+            font-family: inherit;
+            font-size: 17px;
+            height: 292px;
+            line-height: 43px;
+            outline: none;
+            resize: none;
+            width: 100%;
+        }
+
+        .story-input::placeholder {
+            color: #B69A78;
+        }
+
+        .story-counter {
+            bottom: 14px;
+            color: #B09572;
+            font-size: 13px;
+            position: absolute;
+            right: 18px;
+        }
+
+        @media (max-width: 900px) {
+            .scene,
+            .album,
+            .paper-back {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .diary-main {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -999,17 +1343,52 @@
             
             <div class="content">
                 <div class="header">
-                    <div class="album-title">相册加载中...</div>
-                    <div class="album-date"></div>
-                </div>
-                
-
-                
-                <div class="photos-grid">
-                    <div class="photo-card empty-card" style="width:240px;height:320px;display:flex;align-items:center;justify-content:center;color:#8B7355;">
-                        正在读取照片或视频...
+                    <div class="album-title">第一次去公园</div>
+                    <div class="album-date">
+                        <span class="date-leaf">⌁</span>
+                        <span class="date-heart">♥</span>
+                        <span class="album-date-value">2026.05.29</span>
+                        <span class="date-leaf">⌁</span>
                     </div>
                 </div>
+
+                <div class="diary-main">
+                    <section class="media-panel">
+                        <div class="panel-heading">
+                            <div class="panel-icon">▧</div>
+                            <div class="panel-copy">
+                                <div class="panel-title">添加照片或视频</div>
+                                <div class="panel-subtitle">记录美好瞬间，留下成长足迹</div>
+                            </div>
+                        </div>
+                        <div class="photos-grid">
+                            <button class="add-photo-card" type="button">
+                                <div class="add-icon">+</div>
+                                <span class="add-text">添加照片或视频</span>
+                            </button>
+                            <div class="photo-placeholder"><span class="photo-placeholder-icon"></span></div>
+                            <div class="photo-placeholder"><span class="photo-placeholder-icon"></span></div>
+                            <div class="photo-placeholder"><span class="photo-placeholder-icon"></span></div>
+                            <div class="photo-placeholder"><span class="photo-placeholder-icon"></span></div>
+                            <div class="photo-placeholder"><span class="photo-placeholder-icon"></span></div>
+                        </div>
+                        <div class="added-count" id="addedCount">已添加 0 张</div>
+                    </section>
+
+                    <section class="story-panel">
+                        <div class="panel-heading">
+                            <div class="panel-icon">✎</div>
+                            <div class="panel-copy">
+                                <div class="panel-title">写下今天的小故事</div>
+                                <div class="panel-subtitle">记录心情、感受和成长点滴</div>
+                            </div>
+                        </div>
+                        <div class="story-textarea-wrap">
+                            <textarea class="story-input" id="storyInput" maxlength="500" placeholder="记录今天发生的小故事、心情和成长瞬间……"></textarea>
+                            <div class="story-counter" id="storyCounter">0/500</div>
+                        </div>
+                    </section>
+                    </div>
             </div>
         </div>
     </div>

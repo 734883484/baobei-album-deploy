@@ -2,7 +2,6 @@ import {
   deletePhoto,
   fetchAlbum,
   fetchAlbumMedia,
-  formatDate,
   getAlbumIdFromQuery,
   insertPhoto,
   PAGE_URLS,
@@ -18,6 +17,11 @@ let selectedMediaType = "photo";
 let previewUrl = "";
 let cropperInstance = null;
 let albumId = null;
+let diaryMeta = null;
+
+const DEFAULT_DIARY_TITLE = "第一次去公园";
+const DEFAULT_DIARY_DATE = "2026.05.29";
+const DEFAULT_DIARY_STORY = "";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -55,6 +59,60 @@ function updateSelectedSizeHint() {
   const hint = document.getElementById("selectedSizeHint");
   if (hint) {
     hint.textContent = `已选：${selectedSizeText()}`;
+  }
+}
+
+function queryValue(name) {
+  return new URLSearchParams(window.location.search).get(name)?.trim() || "";
+}
+
+function diaryStorageKey(id) {
+  return `growth-diary:${id}`;
+}
+
+function formatDiaryDate(value) {
+  if (!value) return DEFAULT_DIARY_DATE;
+  const match = value.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if (match) {
+    return `${match[1]}.${String(match[2]).padStart(2, "0")}.${String(match[3]).padStart(2, "0")}`;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return DEFAULT_DIARY_DATE;
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function loadDiaryMeta(album = {}) {
+  const saved = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(diaryStorageKey(albumId)) || "{}");
+    } catch {
+      return {};
+    }
+  })();
+
+  diaryMeta = {
+    title: queryValue("topic") || saved.title || album.name || DEFAULT_DIARY_TITLE,
+    date: formatDiaryDate(queryValue("date") || saved.date || album.created_at),
+    story: saved.story || queryValue("note") || DEFAULT_DIARY_STORY
+  };
+  return diaryMeta;
+}
+
+function saveDiaryMeta() {
+  if (!albumId || !diaryMeta) return;
+  const storyInput = document.getElementById("storyInput");
+  const payload = {
+    ...diaryMeta,
+    story: storyInput?.value.trim() || ""
+  };
+  localStorage.setItem(diaryStorageKey(albumId), JSON.stringify(payload));
+}
+
+function updateStoryCounter() {
+  const storyInput = document.getElementById("storyInput");
+  const counter = document.getElementById("storyCounter");
+  if (storyInput && counter) {
+    counter.textContent = `${storyInput.value.length}/500`;
   }
 }
 
@@ -224,17 +282,16 @@ function handleFileSelect(event) {
 }
 
 function renderCard(item) {
-  const sizeClass = item.ratio === "4:3" ? "size-4-3" : "size-3-4";
   const mediaTag =
     item.media_type === "video"
       ? `<video src="${item.url}" controls preload="metadata"></video>`
       : `<img src="${item.url}" alt="照片">`;
 
   return `
-    <div class="photo-card ${sizeClass}" data-id="${item.id}">
+    <div class="photo-card" data-id="${item.id}">
       <div class="photo-actions">
         <button class="photo-action-btn edit-action" data-action="edit" title="编辑">编辑</button>
-        <button class="photo-action-btn delete-action" data-action="delete" title="删除">删除</button>
+        <button class="photo-action-btn delete-action" data-action="delete" title="删除"></button>
       </div>
       <div class="photo-image">${mediaTag}</div>
       <div class="photo-note">
@@ -244,19 +301,36 @@ function renderCard(item) {
   `;
 }
 
+function renderPlaceholder() {
+  return `<div class="photo-placeholder"><span class="photo-placeholder-icon"></span></div>`;
+}
+
 async function renderAlbum() {
   const album = await fetchAlbum(albumId);
   const media = await fetchAlbumMedia(albumId);
-  document.querySelector(".album-title").textContent = album.name;
-  document.querySelector(".album-date").textContent = formatDate(album.created_at);
+  const meta = loadDiaryMeta(album);
+  document.querySelector(".album-title").textContent = meta.title;
+  document.querySelector(".album-date-value").textContent = meta.date;
+  const storyInput = document.getElementById("storyInput");
+  if (storyInput && !storyInput.value) {
+    storyInput.value = meta.story;
+    updateStoryCounter();
+  }
 
   const grid = document.querySelector(".photos-grid");
-  grid.innerHTML = media.map(renderCard).join("") + `
+  const addCard = `
     <button class="add-photo-card" id="addCard" type="button">
       <div class="add-icon">+</div>
       <span class="add-text">添加照片或视频</span>
     </button>
   `;
+  const placeholders = media.length ? "" : Array.from({ length: 5 }, renderPlaceholder).join("");
+  grid.innerHTML = media.length ? media.map(renderCard).join("") + addCard : addCard + placeholders;
+
+  const addedCount = document.getElementById("addedCount");
+  if (addedCount) {
+    addedCount.textContent = `已添加 ${media.length} 张`;
+  }
 
   document.getElementById("addCard").addEventListener("click", openAddModal);
   grid.querySelectorAll(".photo-card[data-id]").forEach((card) => {
@@ -360,6 +434,7 @@ async function init() {
     window.location.href = `${PAGE_URLS.album}?album=${albumId}`;
   };
   window.saveAll = function saveAll() {
+    saveDiaryMeta();
     window.location.href = `${PAGE_URLS.album}?album=${albumId}`;
   };
   window.editPhoto = editPhoto;
@@ -376,6 +451,12 @@ async function init() {
   window.updateCropZoom = function updateCropZoom(value) {
     cropperInstance?.setZoom(Number(value));
   };
+
+  const storyInput = document.getElementById("storyInput");
+  storyInput?.addEventListener("input", () => {
+    updateStoryCounter();
+    saveDiaryMeta();
+  });
 
   await renderAlbum();
 }
