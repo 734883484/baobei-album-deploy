@@ -129,7 +129,6 @@ function saveDiaryMeta() {
     ...diaryMeta,
     title: document.getElementById("diaryTopicInput")?.value.trim() || DEFAULT_DIARY_TITLE,
     date: document.getElementById("diaryDateInput")?.value || diaryMeta.date,
-    time: document.getElementById("diaryTimeInput")?.value || "",
     note: document.getElementById("diaryNoteInput")?.value.trim() || "",
     story: storyInput?.value.trim() || ""
   };
@@ -140,15 +139,13 @@ function saveDiaryMeta() {
 function syncDiaryPreview() {
   const title = document.getElementById("diaryTopicInput")?.value.trim() || DEFAULT_DIARY_TITLE;
   const date = document.getElementById("diaryDateInput")?.value || diaryMeta?.date || "";
-  const time = document.getElementById("diaryTimeInput")?.value || "";
   document.querySelector(".album-title").textContent = title;
-  document.querySelector(".album-date-value").textContent = [formatDiaryDate(date), time].filter(Boolean).join(" · ");
+  document.querySelector(".album-date-value").textContent = formatDiaryDate(date);
 }
 
 function populateDiaryFields(meta) {
   document.getElementById("diaryTopicInput").value = meta.title;
   document.getElementById("diaryDateInput").value = meta.date;
-  document.getElementById("diaryTimeInput").value = meta.time;
   document.getElementById("diaryNoteInput").value = meta.note;
   syncDiaryPreview();
 }
@@ -502,7 +499,7 @@ async function init() {
     saveDiaryMeta();
   });
 
-  ["diaryTopicInput", "diaryDateInput", "diaryTimeInput", "diaryNoteInput"].forEach((id) => {
+  ["diaryTopicInput", "diaryDateInput", "diaryNoteInput"].forEach((id) => {
     document.getElementById(id)?.addEventListener("input", () => {
       syncDiaryPreview();
       saveDiaryMeta();
