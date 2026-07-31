@@ -29,7 +29,7 @@ async function init() {
 
   const photo = document.querySelector(".baby-photo");
   if (photo) {
-    photo.src = "./xiaojiu.png";
+    photo.src = "./homepage-family-warm.jpg";
   }
 
   form.addEventListener("submit", async (event) => {
