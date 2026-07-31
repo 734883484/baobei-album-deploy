@@ -10,8 +10,8 @@ await rm(distDir, { force: true, recursive: true });
 await mkdir(distDir, { recursive: true });
 await cp(publicDir, distDir, { recursive: true });
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL ?? "https://your-project.supabase.co";
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY ?? "your-anon-key";
+const supabaseUrl = (process.env.VITE_SUPABASE_URL ?? "https://your-project.supabase.co").trim();
+const supabaseAnonKey = (process.env.VITE_SUPABASE_ANON_KEY ?? "your-anon-key").trim();
 
 const configScript = `window.__BAOBEI_CONFIG__ = ${JSON.stringify(
   {
