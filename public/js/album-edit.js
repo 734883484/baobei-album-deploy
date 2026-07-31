@@ -81,6 +81,28 @@ function formatDiaryDate(value) {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
 }
 
+function formatDateInput(value) {
+  if (!value) return "";
+  const match = String(value).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if (match) {
+    return `${match[1]}-${String(match[2]).padStart(2, "0")}-${String(match[3]).padStart(2, "0")}`;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatTimeInput(value) {
+  if (!value) return "";
+  const directMatch = String(value).match(/^(\d{1,2}):(\d{2})/);
+  if (directMatch) {
+    return `${String(directMatch[1]).padStart(2, "0")}:${directMatch[2]}`;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
 function loadDiaryMeta(album = {}) {
   const saved = (() => {
     try {
@@ -92,8 +114,10 @@ function loadDiaryMeta(album = {}) {
 
   diaryMeta = {
     title: queryValue("topic") || saved.title || album.name || DEFAULT_DIARY_TITLE,
-    date: formatDiaryDate(queryValue("date") || saved.date || album.created_at),
-    story: saved.story || queryValue("note") || DEFAULT_DIARY_STORY
+    date: formatDateInput(queryValue("date") || saved.date || album.created_at),
+    time: formatTimeInput(queryValue("time") || saved.time || album.created_at),
+    note: saved.note || queryValue("note") || "",
+    story: saved.story || DEFAULT_DIARY_STORY
   };
   return diaryMeta;
 }
@@ -103,9 +127,30 @@ function saveDiaryMeta() {
   const storyInput = document.getElementById("storyInput");
   const payload = {
     ...diaryMeta,
+    title: document.getElementById("diaryTopicInput")?.value.trim() || DEFAULT_DIARY_TITLE,
+    date: document.getElementById("diaryDateInput")?.value || diaryMeta.date,
+    time: document.getElementById("diaryTimeInput")?.value || "",
+    note: document.getElementById("diaryNoteInput")?.value.trim() || "",
     story: storyInput?.value.trim() || ""
   };
+  diaryMeta = payload;
   localStorage.setItem(diaryStorageKey(albumId), JSON.stringify(payload));
+}
+
+function syncDiaryPreview() {
+  const title = document.getElementById("diaryTopicInput")?.value.trim() || DEFAULT_DIARY_TITLE;
+  const date = document.getElementById("diaryDateInput")?.value || diaryMeta?.date || "";
+  const time = document.getElementById("diaryTimeInput")?.value || "";
+  document.querySelector(".album-title").textContent = title;
+  document.querySelector(".album-date-value").textContent = [formatDiaryDate(date), time].filter(Boolean).join(" · ");
+}
+
+function populateDiaryFields(meta) {
+  document.getElementById("diaryTopicInput").value = meta.title;
+  document.getElementById("diaryDateInput").value = meta.date;
+  document.getElementById("diaryTimeInput").value = meta.time;
+  document.getElementById("diaryNoteInput").value = meta.note;
+  syncDiaryPreview();
 }
 
 function updateStoryCounter() {
@@ -309,8 +354,7 @@ async function renderAlbum() {
   const album = await fetchAlbum(albumId);
   const media = await fetchAlbumMedia(albumId);
   const meta = loadDiaryMeta(album);
-  document.querySelector(".album-title").textContent = meta.title;
-  document.querySelector(".album-date-value").textContent = meta.date;
+  populateDiaryFields(meta);
   const storyInput = document.getElementById("storyInput");
   if (storyInput && !storyInput.value) {
     storyInput.value = meta.story;
@@ -456,6 +500,13 @@ async function init() {
   storyInput?.addEventListener("input", () => {
     updateStoryCounter();
     saveDiaryMeta();
+  });
+
+  ["diaryTopicInput", "diaryDateInput", "diaryTimeInput", "diaryNoteInput"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", () => {
+      syncDiaryPreview();
+      saveDiaryMeta();
+    });
   });
 
   await renderAlbum();

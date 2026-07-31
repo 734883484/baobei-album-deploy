@@ -1292,6 +1292,56 @@
             right: 18px;
         }
 
+        .diary-meta-editor {
+            background: rgba(255, 251, 241, 0.72);
+            border: 1px solid rgba(214, 186, 147, 0.72);
+            border-radius: 12px;
+            display: grid;
+            gap: 12px;
+            grid-template-columns: minmax(0, 2fr) minmax(130px, 1fr) minmax(120px, 0.8fr);
+            margin-bottom: 28px;
+            padding: 16px 18px;
+        }
+
+        .diary-meta-field {
+            min-width: 0;
+        }
+
+        .diary-meta-field-wide {
+            grid-column: 1 / -1;
+        }
+
+        .diary-meta-label {
+            color: #8F6A45;
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .diary-meta-input {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid #DDC7A7;
+            border-radius: 7px;
+            color: #5C3A25;
+            font-family: inherit;
+            font-size: 15px;
+            height: 42px;
+            outline: none;
+            padding: 0 12px;
+            width: 100%;
+        }
+
+        .diary-meta-input:focus {
+            background: #FFFDF8;
+            border-color: #B68B50;
+            box-shadow: 0 0 0 3px rgba(182, 139, 80, 0.12);
+        }
+
+        .diary-meta-input::placeholder {
+            color: #B69A78;
+        }
+
         @media (max-width: 900px) {
             .scene,
             .album,
@@ -1302,6 +1352,14 @@
 
             .diary-main {
                 grid-template-columns: 1fr;
+            }
+
+            .diary-meta-editor {
+                grid-template-columns: 1fr;
+            }
+
+            .diary-meta-field-wide {
+                grid-column: auto;
             }
         }
     </style>
@@ -1351,6 +1409,25 @@
                         <span class="date-leaf">⌁</span>
                     </div>
                 </div>
+
+                <section class="diary-meta-editor" aria-label="成长日记信息">
+                    <label class="diary-meta-field">
+                        <span class="diary-meta-label">主题</span>
+                        <input class="diary-meta-input" id="diaryTopicInput" maxlength="40" placeholder="例如：第一次会扶站啦" type="text">
+                    </label>
+                    <label class="diary-meta-field">
+                        <span class="diary-meta-label">日期</span>
+                        <input class="diary-meta-input" id="diaryDateInput" type="date">
+                    </label>
+                    <label class="diary-meta-field">
+                        <span class="diary-meta-label">时间</span>
+                        <input class="diary-meta-input" id="diaryTimeInput" type="time">
+                    </label>
+                    <label class="diary-meta-field diary-meta-field-wide">
+                        <span class="diary-meta-label">一句话记录</span>
+                        <input class="diary-meta-input" id="diaryNoteInput" maxlength="100" placeholder="例如：今天自己扶着沙发站了好久，笑得特别开心" type="text">
+                    </label>
+                </section>
 
                 <div class="diary-main">
                     <section class="media-panel">

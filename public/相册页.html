@@ -943,6 +943,18 @@
             white-space: pre-wrap;
         }
 
+        .diary-summary {
+            background: rgba(255, 250, 239, 0.72);
+            border-left: 3px solid #C59A56;
+            color: #765033;
+            font-size: 16px;
+            line-height: 1.7;
+            margin: -10px auto 28px;
+            max-width: 760px;
+            padding: 10px 16px;
+            text-align: left;
+        }
+
         .empty-view-card {
             align-items: center;
             aspect-ratio: 2 / 1;
@@ -1016,6 +1028,8 @@
                         <span class="date-leaf">⌁</span>
                     </div>
                 </div>
+
+                <div class="diary-summary" id="diaryNoteText" hidden></div>
                 
                 <div class="diary-main">
                     <div class="photos-grid">

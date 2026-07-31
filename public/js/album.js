@@ -25,12 +25,16 @@ function loadDiaryMeta(albumId, album = {}) {
     return {
       title: saved.title || album.name || DEFAULT_DIARY_TITLE,
       date: formatDiaryDate(saved.date || album.created_at),
+      time: saved.time || "",
+      note: saved.note || "",
       story: saved.story || DEFAULT_DIARY_STORY
     };
   } catch {
     return {
       title: album.name || DEFAULT_DIARY_TITLE,
       date: formatDiaryDate(album.created_at),
+      time: "",
+      note: "",
       story: DEFAULT_DIARY_STORY
     };
   }
@@ -81,7 +85,10 @@ async function init() {
   const meta = loadDiaryMeta(albumId, album);
 
   document.querySelector(".album-title").textContent = meta.title;
-  document.querySelector(".album-date-value").textContent = meta.date;
+  document.querySelector(".album-date-value").textContent = [meta.date, meta.time].filter(Boolean).join(" · ");
+  const noteText = document.getElementById("diaryNoteText");
+  noteText.textContent = meta.note;
+  noteText.hidden = !meta.note;
   document.getElementById("storyText").textContent = meta.story;
 
   const grid = document.querySelector(".photos-grid");
