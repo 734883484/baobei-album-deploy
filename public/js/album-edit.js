@@ -158,6 +158,18 @@ function updateStoryCounter() {
   }
 }
 
+async function loadImageFile(file) {
+  const imageUrl = URL.createObjectURL(file);
+  const image = new Image();
+  image.src = imageUrl;
+  try {
+    await image.decode();
+    return image;
+  } finally {
+    URL.revokeObjectURL(imageUrl);
+  }
+}
+
 async function createCroppedImageFile() {
   if (!selectedFile || selectedMediaType === "video") return selectedFile;
 
@@ -168,7 +180,7 @@ async function createCroppedImageFile() {
 
   const outputWidth = selectedSize === "3:4" ? 300 : 400;
   const outputHeight = selectedSize === "3:4" ? 400 : 300;
-  const bitmap = await createImageBitmap(selectedFile);
+  const sourceImage = await loadImageFile(selectedFile);
   const canvas = document.createElement("canvas");
   canvas.width = outputWidth;
   canvas.height = outputHeight;
@@ -176,7 +188,7 @@ async function createCroppedImageFile() {
   context.fillStyle = "#ffffff";
   context.fillRect(0, 0, outputWidth, outputHeight);
   context.drawImage(
-    bitmap,
+    sourceImage,
     croppedAreaPixels.x,
     croppedAreaPixels.y,
     croppedAreaPixels.width,
@@ -231,8 +243,9 @@ function previewUpload(file) {
       aspect: selectedSize === "3:4" ? 3 / 4 : 4 / 3,
       image: previewUrl,
       initialZoom: 1,
-      minZoom: 0.2
+      minZoom: 1
     });
+    document.getElementById("zoomInput").value = "1";
   }
 
   document.getElementById("reselectRow").style.display = "flex";
@@ -276,6 +289,9 @@ function closeModal() {
 function selectSize(size) {
   selectedSize = size === "3-4" ? "3:4" : "4:3";
   updateSelectedSizeHint();
+  if (selectedFile && selectedMediaType === "photo") {
+    previewUpload(selectedFile);
+  }
 }
 
 function nextStep() {

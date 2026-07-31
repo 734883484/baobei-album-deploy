@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import Cropper from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
 
-function CropperBridge({ aspect, image, initialZoom = 1, minZoom = 0.2, onReady }) {
+function CropperBridge({ aspect, image, initialZoom = 1, minZoom = 1, onReady }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(initialZoom);
   const zoomRef = useRef(initialZoom);
@@ -28,13 +28,13 @@ function CropperBridge({ aspect, image, initialZoom = 1, minZoom = 0.2, onReady 
       cropShape="rect"
       image={image}
       minZoom={minZoom}
-      objectFit="contain"
+      objectFit="cover"
       onCropChange={setCrop}
       onCropComplete={(_area, croppedAreaPixels) => {
         croppedAreaPixelsRef.current = croppedAreaPixels;
       }}
       onZoomChange={setZoom}
-      restrictPosition={false}
+      restrictPosition
       showGrid={false}
       zoom={zoom}
     />
