@@ -55,12 +55,26 @@ function renderMediaCard(item) {
 }
 
 async function init() {
-  await requireSession();
+  const session = await requireSession();
+  if (!session) return;
+
   const albumId = getAlbumIdFromQuery();
   if (!albumId) {
     window.location.href = PAGE_URLS.albums;
     return;
   }
+
+  const goBack = () => {
+    window.location.href = PAGE_URLS.albums;
+  };
+  const goToEdit = () => {
+    window.location.href = `${PAGE_URLS.albumEdit}?album=${encodeURIComponent(albumId)}`;
+  };
+
+  window.goBack = goBack;
+  window.goToEdit = goToEdit;
+  document.getElementById("backToDirectoryButton")?.addEventListener("click", goBack);
+  document.getElementById("editDiaryButton")?.addEventListener("click", goToEdit);
 
   const album = await fetchAlbum(albumId);
   const media = await fetchAlbumMedia(albumId);
@@ -79,15 +93,9 @@ async function init() {
       </div>
     `;
 
-  window.goBack = function goBack() {
-    window.location.href = PAGE_URLS.albums;
-  };
-
-  window.goToEdit = function goToEdit() {
-    window.location.href = `${PAGE_URLS.albumEdit}?album=${albumId}`;
-  };
-
   window.viewPhoto = function viewPhoto() {};
 }
 
-init();
+init().catch((error) => {
+  console.error("成长日记加载失败", error);
+});

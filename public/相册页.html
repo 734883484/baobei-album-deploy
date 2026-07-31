@@ -990,14 +990,14 @@
             
             <!-- 顶部操作栏 -->
             <div class="top-bar">
-                <button class="top-btn" onclick="goBack()">
+                <button class="top-btn" id="backToDirectoryButton" type="button">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
                     </svg>
                     返回
                 </button>
-                <button class="top-btn edit-diary-btn" onclick="goToEdit()">
+                <button class="top-btn edit-diary-btn" id="editDiaryButton" type="button">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -1117,14 +1117,6 @@
     <script>
         let currentStep = 1;
         let selectedSize = '3-4';
-        
-        function goBack() {
-            alert('返回目录页');
-        }
-        
-        function goToEdit() {
-            window.location.href = '相册页-编辑态.html';
-        }
         
         function viewPhoto(id) {
             alert('查看照片 ' + id);
