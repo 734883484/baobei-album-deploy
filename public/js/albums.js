@@ -8,8 +8,7 @@ import {
   PAGE_URLS,
   requireSession,
   showMessage,
-  signOut,
-  updateAlbum
+  signOut
 } from "./common.js";
 
 function thumbMarkup(album) {
@@ -46,13 +45,24 @@ function formatBabyAgeMessage(babyNickname, babyBirthDate) {
   return `${babyNickname}宝贝今天已经${ageText}啦，一起记录慢慢长大的每一天`;
 }
 
-function diaryTimestamp(album) {
-  let saved = {};
+function loadSavedDiaryMeta(albumId) {
   try {
-    saved = JSON.parse(localStorage.getItem(`growth-diary:${album.id}`) || "{}");
+    return JSON.parse(localStorage.getItem(`growth-diary:${albumId}`) || "{}");
   } catch {
-    saved = {};
+    return {};
   }
+}
+
+function formatDiaryListDate(value) {
+  const match = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if (match) {
+    return `${match[1]}.${String(match[2]).padStart(2, "0")}.${String(match[3]).padStart(2, "0")}`;
+  }
+  return formatDate(value);
+}
+
+function diaryTimestamp(album) {
+  const saved = loadSavedDiaryMeta(album.id);
 
   const dateMatch = String(saved.date || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
   if (dateMatch) {
@@ -108,30 +118,28 @@ async function renderAlbums(list, container, profile) {
   }
 
   sortDiariesNewestFirst(list).forEach((album, index) => {
+    const savedMeta = loadSavedDiaryMeta(album.id);
+    const diaryTitle = savedMeta.title || album.name;
+    const diaryDate = formatDiaryListDate(savedMeta.date || album.created_at);
+    const diaryDateTime = [diaryDate, savedMeta.time].filter(Boolean).join(" · ");
     const item = document.createElement("div");
     item.className = `album-item${index === 0 ? " active" : ""}`;
     item.innerHTML = `
       <div class="album-thumb">${thumbMarkup(album)}</div>
       <div class="album-info">
-        <div class="album-title">${album.name}</div>
-        <div class="album-meta">${mediaSummary(album.photoCount, album.videoCount)} · ${formatDate(album.created_at)}</div>
+        <div class="album-title">${diaryTitle}</div>
+        <div class="album-meta">${mediaSummary(album.photoCount, album.videoCount)} · ${diaryDateTime}</div>
       </div>
-      <svg class="album-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <button class="album-edit" type="button" aria-label="编辑${diaryTitle}" title="编辑日记">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
     `;
     item.addEventListener("click", () => {
       window.location.href = `${PAGE_URLS.album}?album=${album.id}`;
     });
-    item.querySelector(".album-edit").addEventListener("click", async (event) => {
+    item.querySelector(".album-edit").addEventListener("click", (event) => {
       event.stopPropagation();
-      const nextName = window.prompt("编辑日记主题", album.name)?.trim();
-      if (!nextName || nextName === album.name) return;
-      try {
-        await updateAlbum(album.id, { name: nextName });
-        const refreshed = await fetchAlbums();
-        await renderAlbums(refreshed, container, profile);
-      } catch (error) {
-        window.alert(error.message || "修改失败");
-      }
+      window.location.href = `${PAGE_URLS.albumEdit}?album=${encodeURIComponent(album.id)}`;
     });
     container.appendChild(item);
   });

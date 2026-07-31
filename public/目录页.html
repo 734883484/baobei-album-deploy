@@ -239,9 +239,26 @@
             font-size: 15px;
         }
         .album-edit {
-            width: 24px;
-            height: 24px;
+            align-items: center;
+            background: transparent;
+            border: 0;
             color: #a38352;
+            cursor: pointer;
+            display: flex;
+            flex: 0 0 36px;
+            height: 36px;
+            justify-content: center;
+            padding: 0;
+            width: 36px;
+        }
+        .album-edit svg {
+            height: 24px;
+            width: 24px;
+        }
+        .album-edit:hover,
+        .album-edit:focus-visible {
+            color: #70451f;
+            outline: none;
         }
         .album-empty {
             min-height: 260px;
