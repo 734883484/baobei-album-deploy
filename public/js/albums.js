@@ -121,14 +121,13 @@ async function renderAlbums(list, container, profile) {
     const savedMeta = loadSavedDiaryMeta(album.id);
     const diaryTitle = savedMeta.title || album.name;
     const diaryDate = formatDiaryListDate(savedMeta.date || album.created_at);
-    const diaryDateTime = [diaryDate, savedMeta.time].filter(Boolean).join(" · ");
     const item = document.createElement("div");
     item.className = `album-item${index === 0 ? " active" : ""}`;
     item.innerHTML = `
       <div class="album-thumb">${thumbMarkup(album)}</div>
       <div class="album-info">
         <div class="album-title">${diaryTitle}</div>
-        <div class="album-meta">${mediaSummary(album.photoCount, album.videoCount)} · ${diaryDateTime}</div>
+        <div class="album-meta">${mediaSummary(album.photoCount, album.videoCount)} · ${diaryDate}</div>
       </div>
       <button class="album-edit" type="button" aria-label="编辑${diaryTitle}" title="编辑日记">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
