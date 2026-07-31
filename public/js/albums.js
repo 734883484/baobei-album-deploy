@@ -46,6 +46,42 @@ function formatBabyAgeMessage(babyNickname, babyBirthDate) {
   return `${babyNickname}宝贝今天已经${ageText}啦，一起记录慢慢长大的每一天`;
 }
 
+function diaryTimestamp(album) {
+  let saved = {};
+  try {
+    saved = JSON.parse(localStorage.getItem(`growth-diary:${album.id}`) || "{}");
+  } catch {
+    saved = {};
+  }
+
+  const dateMatch = String(saved.date || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if (dateMatch) {
+    const timeMatch = String(saved.time || "").match(/^(\d{1,2}):(\d{2})/);
+    const timestamp = new Date(
+      Number(dateMatch[1]),
+      Number(dateMatch[2]) - 1,
+      Number(dateMatch[3]),
+      Number(timeMatch?.[1] || 0),
+      Number(timeMatch?.[2] || 0)
+    ).getTime();
+    if (!Number.isNaN(timestamp)) return timestamp;
+  }
+
+  const createdAt = new Date(album.created_at).getTime();
+  return Number.isNaN(createdAt) ? 0 : createdAt;
+}
+
+function sortDiariesNewestFirst(list) {
+  return [...list].sort((left, right) => {
+    const diaryDifference = diaryTimestamp(right) - diaryTimestamp(left);
+    if (diaryDifference !== 0) return diaryDifference;
+
+    const createdDifference = new Date(right.created_at).getTime() - new Date(left.created_at).getTime();
+    if (createdDifference !== 0) return createdDifference;
+    return String(left.id).localeCompare(String(right.id));
+  });
+}
+
 async function renderAlbums(list, container, profile) {
   container.innerHTML = "";
 
@@ -71,7 +107,7 @@ async function renderAlbums(list, container, profile) {
     return;
   }
 
-  list.forEach((album, index) => {
+  sortDiariesNewestFirst(list).forEach((album, index) => {
     const item = document.createElement("div");
     item.className = `album-item${index === 0 ? " active" : ""}`;
     item.innerHTML = `

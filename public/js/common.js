@@ -168,7 +168,7 @@ export async function fetchAlbums() {
     .from("albums")
     .select("id,name,created_at")
     .eq("user_id", session.user.id)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false });
   if (albumError) throw albumError;
 
   const albumIds = albums.map((album) => album.id);
